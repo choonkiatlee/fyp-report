@@ -1,0 +1,20 @@
+\documentclass[../main.tex]{subfiles}
+
+%\documentclass[class=article, crop=false]{standalone}
+%\usepackage[subpreambles=true]{standalone}
+%\usepackage{import}
+
+\begin{document}
+
+Systematic trading of financial securities is a growing field, with just over half of the trading volume in S\&P 500 options attributed to high frequency algorithmic trading. 
+
+In this project, we aim to develop a \textit{momentum}-based trading strategy. \textit{Momentum}-based trading strategies aim to identify an ongoing price trend and then take a market position in order to benefit from its continuation. We aim to do this by developing a model for the price dynamics of the traded commodity, then use bayesian filtering techniques to track the underlying trends in the price.
+
+The underlying dynamics of financial asset values are not clear, despite extensive study of the behaviour of asset prices. Thus, the first part of our project focuses on building a model of the underlying asset price dynamics. Since our momentum-based trading strategy relies on its ability to determine a trend to follow, we focus on developing a model which can model time-varying trends in price. 
+
+The second part of our project focuses on applying Bayesian filtering techniques for performing state inference given a state space model of price dynamics obtained in the previous part. For inference, we have explored both the use of a simple bootstrap particle filter as well as a more sophisticated Rao-Blackwellised particle filter based on a Scale Mixture of Normals (SMiN) representation of our proposed model. We have also performed parameter estimation, and have considered both maximum likelihood estimates of the mean reversion coefficient as well as fully bayesian approaches utilising state augmentation.
+
+Lastly, we will apply our inference techniques to a real dataset of recent EURUSD exchange rates. We apply a basic trading strategy to our model, and show that it has the potential to generate excess returns in the market.
+
+
+\end{document}

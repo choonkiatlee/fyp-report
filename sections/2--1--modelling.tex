@@ -1,0 +1,121 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\subsubsection{Basic State Space Model}
+
+We build upon the model proposed by Christensen et al. \cite{christensen2012forecasting} (\autoref{eq:2__1__christensen_state_space_model}). In the original Christensen model, the state of the traded commodity is modelled by 2 components: ``value'' $x_1$ and ``trend'' $x_2$. These components correspond to the the price and return of the traded commodity respectively. 
+
+\tofix{Insert Picture Here}
+
+Trend changes can cause difficulty for momentum strategies. This model attempts to address this issue by allowing for a finite number of discrete jumps in the trend process. This allows for modelling of sharp changes of sentiment in the market, and allow our filtered predictions to reflect these changes of sentiment more quickly than models that simply smooth the price series. 
+
+\begin{equation}
+    \begin{bmatrix}
+    dx_{1,t} \\ dx_{2,t}
+    \end{bmatrix} = 
+    \underbrace{
+        \begin{bmatrix}
+        0 & 1 \\ 0 & \theta
+        \end{bmatrix}
+        \begin{bmatrix}
+        x_{1,t} \\ x_{2,t}
+        \end{bmatrix} dt
+    }_{\text{Mean Reverting Returns}} 
+    + 
+    \underbrace{
+        \begin{bmatrix}
+        0 \\ \sigma
+        \end{bmatrix} dW_t
+    }_{\text{Brownian Motion}}
+    + 
+    \underbrace{
+        \begin{bmatrix}
+        0 \\ 1
+        \end{bmatrix} dJ_t
+    }_{\text{Finite-activity Gauss-Poisson jump}}
+    \label{eq:2__1__christensen_state_space_model}
+\end{equation}
+
+\subsubsection{Proposed State-Space Model}
+
+Statistical testing has found that infinite-activity jumps (rather than finite-activity jumps) are present in high frequency stock returns \cite{ait2011testing}. This might be due to significant price movements triggering stop-loss orders that prompt further trading, leading to a self-exciting series of high frequency small jumps \cite{osler2005stop}.
+
+Thus, we propose modelling a tradable commodity's price using Lévy-type processes with infinite jump activity as given by \autoref{eq:2__1__our_state_space_model} below.
+\begin{equation}
+    \begin{bmatrix}
+    dx_{1,t} \\ dx_{2,t}
+    \end{bmatrix} = 
+    \underbrace{
+        \begin{bmatrix}
+        0 & 1 \\ 0 & \theta
+        \end{bmatrix}
+        \begin{bmatrix}
+        x_{1,t} \\ x_{2,t}
+        \end{bmatrix} dt
+    }_{\text{Mean Reverting Returns}} 
+    + 
+    \underbrace{
+        \begin{bmatrix}
+        0 \\ 1
+        \end{bmatrix} dL_t
+    }_{\text{Infinite-activity Lévy process}}
+    \label{eq:2__1__our_state_space_model}
+\end{equation}
+
+We then observe the price process corrupted in gaussian noise:
+\begin{equation}
+    y_t = x_{1,t} + \sigma_{obs} \eta_t \text{, where } \eta_t \sim \mathcal{N}(0,1)
+\end{equation}
+
+\subsubsection{Choice of Lévy process}
+
+% By choosing a Lévy process with both a continuous gaussian component and an infinite-activity jump process component, we are able to model both random walk features of asset prices as well as predictable trends in asset prices resulting from the high-frequency small jumps caused by market microstructure. 
+We choose use an $\alpha$-stable Lévy process to capture the characteristics of the noise terms of the basic state space model provided in \autoref{eq:2__1__christensen_state_space_model} -- namely the Brownian motion term and the jump term. An $\alpha$-stable Lévy process has both a continuous gaussian component and an infinite-activity jump process component, which allows us to capture the noise characteristics proposed in \autoref{eq:2__1__christensen_state_space_model} in a concise manner. This also allows us to leverage existing literature developed for $\alpha$-stable Lévy proceses to tackle the inference problem. 
+
+The family of $\alpha$-stable distributions forms a rich class of distributions which allow for asymmetry and heavy tails. We define a real-valued random variable $X$ to follow an stable distribution $S_\alpha(\sigma, \beta, \mu)$ if and only if its characteristic function is given by:
+\begin{equation}
+    \mathbb{E} [e^{itX}]  = \begin{cases} 
+    \exp{( -\sigma^\alpha |t|^\alpha [1-i\beta \text{sign}(t)\tan(\frac{\alpha\pi}{2})] + i\mu t )} & \alpha \neq 1 \\
+    \exp{( -\sigma^\alpha |t| [1+i\beta \frac{2}{\pi}\text{sign}(t) \ln{t}] + i\mu t)} & \alpha \neq 1
+    \end{cases}
+\end{equation}
+
+We can then define the scalar $\alpha$-stable process $L_t$ that we will use as the driving Lévy process in our state-space model as a process which has:
+
+\begin{itemize}
+    \itemsep0em 
+    \item $L_0$ = 0
+    \item Independent $\alpha$-stable increments: $L_t - L_s \sim S_\alpha( (t-s)^{1/\alpha}, \beta, 0), t > s$
+\end{itemize}
+
+For $1 \leq \alpha < 2$, this is a pure jump plus gaussian drift process as desired. 
+
+\subsubsection{Solution for the proposed model}
+
+We consider a one-dimensional version of our proposed model which only considers the returns component ($x_2$).
+\begin{equation}
+    dx_{2,t} = \theta x_{2,t} dt + \sigma dL_t
+    \label{eq:2__1__single_dim_model}
+\end{equation}
+
+For the scalar case, this can be solved using results based on \cite{samoradnitsky2017stable} to give a tractable state transition density: 
+\begin{equation}
+    f(x_{2,t} | x_{2,s}) \sim S_\alpha( \sigma_{t-s}, \beta, \exp ( \theta(t-s) x_{2,s}),    \qquad  \sigma_{\delta t} = \left( \sigma \frac{\exp(\alpha \theta \delta t) - 1 }{\alpha \theta}\right)^{1/\alpha}
+    \label{eq:2__1__state_transition_density}
+\end{equation}
+
+\subsubsection{Formulation of the Inference Problem in Discrete Time}
+
+Using the solution to the one-dimensional version of the proposed model in \autoref{eq:2__1__state_transition_density}, we can formulate our original continuous-time state space model as a discrete-time state space model where the parameters of the discrete-time state matrix vary according to the continuous time solution. 
+
+This approach allows us to use established techniques used for discrete time inference.  
+
+\begin{align}
+    \mathbf{x}_t & = \mathbf{A}(\delta t, \mathbf{x}_{t-1}) . \mathbf{x_{t-1}} + \mathbf{b}( \delta t, \mathbf{x}_{t-1} ) . L_t \notag\\
+    y_t & = \mathbf{C} . \mathbf{x}_t + \mathbf{d} . \mathbf{\eta}_t \\
+    \text{where} \qquad \delta_t & = T_t - T_{t-1} \notag \\
+    l_t & \sim S_{\alpha/2}(1,1,0) \text{  and  } \eta_t \sim \mathcal{N}(0,1) \notag
+\end{align}
+
+\end{document}

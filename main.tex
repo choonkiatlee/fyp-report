@@ -1,0 +1,245 @@
+\documentclass[12pt]{article}
+
+%\usepackage[subpreambles=true]{standalone}
+%\usepackage{import}
+
+\textwidth 16.5cm \oddsidemargin -0.5cm \topmargin -2cm \textheight
+23cm \footskip 1cm \usepackage{epsfig}
+\usepackage{amsmath,graphicx,psfrag,pstricks,float}
+\usepackage{amsfonts}
+\usepackage{subfig}
+\usepackage{booktabs}
+%\usepackage{multirow}
+%\usepackage{multicol}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{titlesec}
+\titlespacing\section{0pt}{8pt plus 2pt minus 2pt}{1pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{10pt plus 2pt minus 2pt}{1pt plus 2pt minus 2pt}
+
+\usepackage{parskip}
+
+\def\n{\noindent}
+\def\u{\underline}
+\def\hs{\hspace}
+\def\nt{\notag}
+\newcommand{\thrfor}{.^{\displaystyle .} .}
+\newcommand{\bvec}[1]{{\bf #1}}
+
+%--------------------- Formatting options -----------------------------%
+\linespread{1.3}   % 1.5 line spacing
+\renewcommand{\arraystretch}{1.2} % More space between rows in an array
+\usepackage{xcolor}
+
+\newcommand{\tofix}[1]{
+    \textcolor{red}{#1}
+}
+
+\newcommand{\ToFix}[1]{
+    \begingroup\color{red}#1 \endgroup
+}
+
+\newcommand{\OptionOne}[1]{
+    \begingroup\color{green} 
+        \emph{Option 1:} 
+        #1 
+    \endgroup
+}
+
+\newcommand{\OptionTwo}[1]{
+     \begingroup\color{green} 
+        \emph{Option 2:} 
+        #1 
+    \endgroup
+}
+
+%--------------------- Math Commands for Distributions -------------%
+\newcommand\iid{i.i.d.}
+\newcommand{\Gaussian}{\mathcal{N}}
+%\renewcommand*{\v}[1]{\mathbf{#1}}   % Short for "vector"
+
+%--------------------- Bibliography ---------------------------------%
+\usepackage[
+    sorting=none
+]{biblatex}
+\addbibresource{bib.bib}
+
+%-------------------- Selective Compilation Booleans ----------------%
+\usepackage{ifthen}
+\input{selective_compilation_booleans}
+
+
+
+% ------------------- Multiple Files packages / commands -----------%
+% \usepackage{xr}
+
+% \makeatletter
+% \newcommand*{\addFileDependency}[1]{% argument=file name and extension
+%   \typeout{(#1)}
+%   \@addtofilelist{#1}
+%   \IfFileExists{#1}{}{\typeout{No file #1.}}
+% }
+% \makeatother
+
+% \newcommand*{\myexternaldocument}[1]{%
+%     \externaldocument{#1}%
+%     \addFileDependency{#1.tex}%
+%     \addFileDependency{#1.aux}%
+% }
+\usepackage{hyperref}
+% \usepackage{refcheck}
+\usepackage{subfiles} % Best loaded last in the preamble
+
+
+
+\title{Simulation and Inference in Limit Order Books}
+\author{Choon Kiat Lee}
+\date{ }
+
+
+\begin{document}
+\noindent
+
+\maketitle
+
+\tableofcontents
+
+% Selective Compilation Flags %
+ \setboolean{display2_1}{true}
+% \setboolean{display2_2_1}{true}
+%\setboolean{display2_2_2}{true}
+
+%\import{sections/}{1--introduction}
+
+\section{Introduction}
+\ifthenelse{\boolean{display1}}{\subfile{sections/1--introduction}}{}
+
+\section{Theory}
+
+    \subsection{Modelling}
+    \ifthenelse{\boolean{display2_1}}{\subfile{sections/2--1--modelling}}{}
+    
+    \subsection{Inference}
+    
+    \subsubsection{Simple Particle Filter}
+    \ifthenelse{\boolean{display2_2_1}}{\subfile{sections/2--2--1--simple-particle-filter}}{}
+    
+    \subsubsection{Rao-Blackwellised Particle Filter (RBPF)}
+    \ifthenelse{\boolean{display2_2_2}}{\subfile{sections/2--2--2--RBPF}}{}
+    
+    \subsubsection{Sequential Markov Chain Monte Carlo (SMCMC)}
+    
+    \subsection{Parameter Estimation}
+
+
+\section{Experimental Results}
+
+    \subsection{Simulation Results}
+    \subsection{Comparison of inference algorithms}
+    \subsection{Parameter Estimation}
+    \subsection{Performance on actual data}
+    \subsection{Trading Simulations}
+
+
+\section{Discussion}
+
+    \subsection{Efficiency}
+    \subsection{Timescales}
+    \subsection{Computational Costs}
+
+\section{Conclusion}
+
+\printbibliography[title={References},heading=bibnumbered]
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \section{ Useful Snippets }
+
+% \subsection{Figures}
+
+% Single Figure
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=10.0cm]{1_fig.png}
+%     \caption{Gaussian Process Predictive Distribution with @covSEiso}
+%     \label{fig:1_fig}
+% \end{figure}
+
+% \newpage
+
+% Multiple Figure Thing
+
+% \begin{figure}[h!]
+%     \centering
+%     \subfloat[QQ plot for 1st model\label{fig:2_qq_covSEiso}]{
+%     \includegraphics[height=4.5cm]{3_qq_covSEiso.png}}
+%     \qquad
+%     \subfloat[QQ plot for 2nd model\label{fig:2_qq_local_minima}]{\includegraphics[height=4.5cm]{2_qq_local_minima.png}}
+%     \caption{QQ plots of residuals of both local minima of the @covSEiso models}
+%     \label{fig:2_qq_plots}
+% \end{figure}
+
+
+% \subsection{Tables}
+
+% Simple Table
+
+% \begin{table}[h!]
+% \centering
+% \begin{tabular}[width=\linewidth]{ c|ccc } 
+%     \toprule
+% 	%\hline
+% 	 & Initial & Optimised & Intuitive Explanation   \\ 
+% 	\hline
+% 	$\theta_1$ & $e^{-1}$ & 0.128 & Characteristic Length Scale \\ 
+% 	$\theta_2$ & 1 & 0.897 & Signal Std. Dev. \\
+% 	$ p(\bf{y}|\bf{x})$ & - & $6.80 \times 10^{-6}$ & Probability of Training data\\
+% 	%\hline
+% 	\bottomrule
+% \end{tabular}
+% \caption{Final optimised covariance hyperparameters}
+% \label{table: 1_hyperparams}
+% \end{table}
+
+% \subsection{Equations}
+
+% Simple Equation with label
+
+% \begin{equation}
+%     \label{eqn:covSEiso}
+%     k(\bf{x},\bf{x'}) = \theta_2^2 e^{-(\bf{x}-\bf{x'})^T (\theta_1^2\bf{I})^{-1} (\bf{x}-\bf{x'})} 
+% \end{equation}
+
+% Equation Array
+
+% \begin{eqnarray}
+%     k(x,x_*) & = & \theta_3^2 exp(\frac{-2sin^2(\pi (x-x_*))/\theta_2}{\theta_1^2})
+%     \times 
+%     \theta_5^2 exp(\frac{-(x-x_*)^2}{2\theta_4^2}) \notag \\
+%     & = & A(x,x_*) \times exp(\frac{-2sin^2(\pi (x-x_*))/\theta_2}{\theta_1^2})
+%     \label{eqn:periodic_product}
+% \end{eqnarray}
+
+% \subsection{Code}
+
+% \begin{lstlisting}[frame=single]  
+% meanfunc = []; covfunc = @covSEiso; likfunc = @likGauss;
+% hyp = struct('mean', [], 'cov', [-1 0], 'lik', 0);
+% hyp2 = minimize(hyp, @gp, -100, @infGaussLik, meanfunc, covfunc, likfunc, x, y);
+% [mu s2] = gp(hyp2, @infGaussLik, meanfunc, covfunc, likfunc, x, y, xs);
+% \end{lstlisting}

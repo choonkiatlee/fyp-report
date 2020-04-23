@@ -1,0 +1,54 @@
+\newcommand{\newDisplayBoolean}[1]{
+    \newboolean{#1}
+    \setboolean{#1}{false}
+}
+
+%%% Controls showing the preface
+\newDisplayBoolean{display1} 
+
+\newDisplayBoolean{display2}  
+    \newDisplayBoolean{display2_1} 
+        \newDisplayBoolean{display2_2_1} 
+        \newDisplayBoolean{display2_2_2} 
+        \newDisplayBoolean{display2_2_3} 
+    \newDisplayBoolean{display2_3} 
+
+\newDisplayBoolean{display3} 
+    \newDisplayBoolean{display3_1} 
+    \newDisplayBoolean{display3_2} 
+    \newDisplayBoolean{display3_3} 
+    \newDisplayBoolean{display3_4} 
+    \newDisplayBoolean{display3_5} 
+
+\newDisplayBoolean{display4}
+    \newDisplayBoolean{display4_1}
+    \newDisplayBoolean{display4_2}
+    \newDisplayBoolean{display4_3}
+
+\newDisplayBoolean{display5}
+\newDisplayBoolean{display6}
+
+
+%%%%%%%%%%%%% Set Booleans %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \setboolean{display1}{false}
+
+% \setboolean{display2}{false}
+% \setboolean{display2_1}{true}
+% \setboolean{display2_3}{false}
+% \setboolean{display2_4}{false}
+
+% \setboolean{display3}{false}
+% \setboolean{display3_1}{false}
+% \setboolean{display3_2}{false}
+% \setboolean{display3_3}{false}
+% \setboolean{display3_4}{false}
+% \setboolean{display3_5}{false}
+
+% \setboolean{display4}{false}
+% \setboolean{display4_1}{false}
+% \setboolean{display4_2}{false}
+% \setboolean{display4_3}{false}
+
+% \setboolean{display5}{false}
+% \setboolean{display6}{false}

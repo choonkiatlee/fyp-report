@@ -1,0 +1,45 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+% \myexternaldocument{sections/2--1--modelling}
+
+\textbf{Bootstrap Particle Filter}
+
+With the continuous-time probability density from \autoref{eq:2__1__state_transition_density}, we can perform inference using a simple bootstrap particle filter. A brief description of the bootstrap particle filter is given in: 
+
+However, the state transition density is only tractable for the single dimensional model given in Equation \autoref{eq:2__1__single_dim_model}. Thus, we first perform inference on the single dimensional returns($x_1$) model, and generate the price ($x_2$) process through numerical integration. 
+
+While this simple method manages to remove noise significantly in the returns process, it suffers greatly from drift. Small errors in the inference of the returns process are compounded, leading to the inferred price process deviating from the ground truth (See section \tofix{X}).
+
+\textbf{Drift-correction}
+
+To combat the problem of drift, we incorporate a discrete integration approximation to the price process ($x_1$) into our state space model (\autoref{eq:2__2__1__drift_corrected_simple_PF}). This allows us to use numerical integration to obtain an estimate of the current inferred value of the price process at every time step that can then be used to correct for price drift in the system. This drift-corrected state space model (\autoref{eq:2__2__1__drift_corrected_simple_PF}) forms the basis of all further explorations.
+
+\begin{equation}
+    \underbrace{
+        \begin{bmatrix}
+        x_{1,t+\delta t} \\ x_{2,t + \delta_t}
+        \end{bmatrix}
+    }_{\mathbf{S_{t + \delta t}}}
+     =
+    \underbrace{
+        \begin{bmatrix}
+        1 & \delta t \\ 0 & e^{\theta \delta t}
+        \end{bmatrix}
+    }_{\mathbf{A}}
+    \underbrace{
+        \begin{bmatrix}
+        x_{1,t} \\ x_{2,t}
+        \end{bmatrix}
+    }_{\mathbf{S_t}}
+    + 
+    \underbrace{
+        \begin{bmatrix}
+        0 \\ 1
+        \end{bmatrix}
+    }_{\mathbf{b}} L_t, \qquad  L_t \sim S_\alpha (\sigma_{\delta t}, \beta, 0)
+    \label{eq:2__2__1__drift_corrected_simple_PF}
+\end{equation}
+
+\end{document}

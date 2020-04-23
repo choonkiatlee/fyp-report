@@ -1,0 +1,61 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+
+\subsection{Inference}
+
+\subsubsection{Simple Particle Filter}
+
+\subsubsection{Rao-Blackwellised Particle Filter (RBPF)}
+
+In foreign exchange markets such as the EUR/USD, market moves are widely regarded to be symmetric in nature \cite{tankov2003financial}. This motivates the selection of the parameter $\beta = 0$, leading to a Symmetric $\alpha$-stable (S$\alpha$S) process being employed. 
+
+For $\beta = 0$, we have a convenient Scale Mixture of Normals (SMiN) representation based off the product property of $\alpha$-stable distributions: If X and Y are independent random variables with $\lambda_1 \sim S_{\alpha/2}(1, 1, 0)$ and $\lambda_2 \sim S_2(1,0,0) = \mathcal{N}(0,1)$, then $\lambda_1 \lambda_2 \sim S_\alpha(1, 0, 0)$
+
+\begin{equation}
+    \underbrace{
+        \begin{bmatrix}
+        x_{1,t+\delta t} \\ x_{2,t + \delta_t}
+        \end{bmatrix}
+    }_{\mathbf{S_{t + \delta t}}}
+    =
+    \underbrace{
+        \begin{bmatrix}
+        1 & \delta t \\ 0 & e^{\theta \delta t}
+        \end{bmatrix}
+    }_{\mathbf{A}}
+    \underbrace{
+        \begin{bmatrix}
+        x_{1,t} \\ x_{2,t}
+        \end{bmatrix}
+    }_{\mathbf{S_t}}
+    + 
+    \underbrace{
+        \begin{bmatrix}
+        0 \\ \sigma_t \sqrt{\lambda_{1, t-1}}
+        \end{bmatrix}
+    }_{\mathbf{b}} \lambda_{2, t};
+    \qquad \lambda_{2,t} \sim \mathcal{N}(0,1) \text{,   } \lambda_{1,t} \sim S_{\alpha/2}(1,1,0)
+    \label{eqn:RBPF_model}
+\end{equation}
+
+There are 2 challenges to a naiive application of this basic Rao-Blackwellised particle filter. 
+
+\begin{enumerate}
+    \item In the RBPF, we need to sample from an alpha stable distribution with much heavier tails (
+    \item A naiive implementation of the Rao-Blackwellised particle filter can be very slow, as an additional Kalman Filter step needs to be performed for each particle. 
+\end{enumerate}
+
+One of the main focuses in the project is on measures to mitigate these 2 problems.
+
+
+
+
+\subsubsection{Sequential Markov Chain Monte Carlo (SMCMC) methods}
+
+
+
+
+
+\end{document}
