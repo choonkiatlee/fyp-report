@@ -107,15 +107,19 @@ For the scalar case, this can be solved using results based on \cite{samoradnits
 
 \subsubsection{Formulation of the Inference Problem in Discrete Time}
 
-Using the solution to the one-dimensional version of the proposed model in \autoref{eq:2__1__state_transition_density}, we can formulate our original continuous-time state space model as a discrete-time state space model where the parameters of the discrete-time state matrix vary according to the continuous time solution. 
+Using the solution to the one-dimensional version of the proposed model in \autoref{eq:2__1__state_transition_density}, we can formulate our original continuous-time state space model as a discrete-time state space model where the parameters of the discrete-time state matrices $\bvec{A}(\delta t)$ and $\bvec{b}(\delta t)$ vary according to the continuous time solution and the gap to the previous time step, $\delta t$. 
 
-This approach allows us to use established techniques used for discrete time inference.  
+For brevity, we will assume in all subsequent equations that $\bvec{A}$ and $\bvec{b}$ are implicitly dependent on $\delta t$, and will drop this explicit dependence. 
+
+This approach allows us to use established techniques used for discrete time inference. 
 
 \begin{align}
-    \mathbf{x}_t & = \mathbf{A}(\delta t, \mathbf{x}_{t-1}) . \mathbf{x_{t-1}} + \mathbf{b}( \delta t, \mathbf{x}_{t-1} ) . L_t \notag\\
+    \mathbf{x}_t & = \mathbf{A}(\delta t) . \mathbf{x_{t-1}} + \mathbf{b}( \delta t) . L_t \notag\\
     y_t & = \mathbf{C} . \mathbf{x}_t + \mathbf{d} . \mathbf{\eta}_t \\
     \text{where} \qquad \delta_t & = T_t - T_{t-1} \notag \\
     l_t & \sim S_{\alpha/2}(1,1,0) \text{  and  } \eta_t \sim \mathcal{N}(0,1) \notag
 \end{align}
 
+
+\printbibliography
 \end{document}

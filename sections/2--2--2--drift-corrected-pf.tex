@@ -1,0 +1,34 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+
+To combat the problem of drift, we incorporate a discrete integration approximation to the price process ($x_1$) into our state space model (\autoref{eq:2__2__1__drift_corrected_simple_PF}). This allows us to use numerical integration to obtain an estimate of the current inferred value of the price process at every time step that can then be used to correct for price drift in the system. This drift-corrected state space model (\autoref{eq:2__2__1__drift_corrected_simple_PF}) forms the basis of all further explorations.
+
+\begin{equation}
+\underbrace{
+	\begin{bmatrix}
+	x_{1,t+\delta t} \\ x_{2,t + \delta_t}
+	\end{bmatrix}
+}_{\mathbf{S_{t + \delta t}}}
+=
+\underbrace{
+	\begin{bmatrix}
+	1 & \delta t \\ 0 & e^{\theta \delta t}
+	\end{bmatrix}
+}_{\mathbf{A}}
+\underbrace{
+	\begin{bmatrix}
+	x_{1,t} \\ x_{2,t}
+	\end{bmatrix}
+}_{\mathbf{S_t}}
++ 
+\underbrace{
+	\begin{bmatrix}
+	0 \\ 1
+	\end{bmatrix}
+}_{\mathbf{b}} L_t, \qquad  L_t \sim S_\alpha (\sigma_{\delta t}, \beta, 0)
+\label{eq:2__2__1__drift_corrected_simple_PF}
+\end{equation}
+
+\end{document}

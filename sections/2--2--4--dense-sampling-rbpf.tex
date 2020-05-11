@@ -1,0 +1,56 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+
+We note that the cause of the problem of sample impoverishment is due to the low number of particles being drawn from the tails of the proposal distribution, leading to low numbers of particles with effective weights when $\vt$ is large
+
+Thus, one method of reducing sample impoverishment in the particle filter would be to simply generate a larger number of particles from the tails of the proposal distribution. In order to preserve the required proposal distribution, we need to then scale the weights of the extra particles generated from the tails appropriately. 
+
+This leads to the following algorithm for sampling from the proposal distribution given in \autoref{eq:2__2__2__RBPF_importance_dist}: 
+
+\begin{itemize}
+	
+	\item Define the hyperparameters $\epsilon_\lambda$ and $m$. In this example, we select $\epsilon_\lambda = 1 \times 10^{-1}$ and $m=3$.
+	
+	\item Calculate the number of extra particles ($N_{extra}$) to draw from the right tail using: 
+	
+	\begin{align}
+	threshold &= \frac{f_{pareto}(\lambda_k | \alpha/2, 1) - \SAhalf(\lambda_k | 1,1,0)}{\SAhalf(\lambda_k | 1,1,0)} \\
+	N_{extra} &= P(\lambda > threshold) \times Nm
+	\end{align} 
+	
+	\item Draw $N_{extra}$ particles from the right tail:
+	
+	\begin{equation}
+	\lambda_k^{(i)} \sim f_{bounded \text{ }pareto}(\lambda_k | \alpha = \alpha/2, \beta = 1, L = threshold) \qquad i=1...N_{extra}
+	\end{equation}
+	
+	\item Draw $N - N_{extra}$ particles from the truncated alpha stable distribution using a simple rejection sampler:
+	
+	\begin{itemize}
+		\item Draw $\lambda_k^{(i)} \sim \SAhalf(\lambda_k | 1, 1, 0)$
+		\item Accept if $\lambda_k^{(i)} < threshold$
+	\end{itemize}
+	
+	\item Alter the weights of the particles drawn from the tails:
+	
+	$$w_i = \frac{1}{m} w_i \qquad \text{for: } i \in [1, N_{extra}]$$	
+\end{itemize}
+
+
+
+
+
+
+
+
+%\begin{figure}[h!]
+%	\centering
+%	\includegraphics[width=15.0cm]{../plots/2__2__2__dense_sampling.png}
+%	\caption{Improvement in normalised entropy of PF weights using dense sampling}
+%	\label{fig:2__2__2__dense_sampling}
+%\end{figure}
+
+
+\end{document}

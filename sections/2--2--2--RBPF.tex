@@ -6,7 +6,7 @@
 
 In foreign exchange markets such as the EUR/USD, market moves are widely regarded to be symmetric in nature \cite{tankov2003financial}. This motivates the selection of the parameter $\beta = 0$. Instead of considering the general $\alpha$-stable process, we can instead restrict ourselves to a more analytically tractable sub-class, the a Symmetric $\alpha$-stable (S$\alpha$S) process instead.
 
-For $\beta = 0$, we have a convenient Scale Mixture of Normals (SMiN) representation based off the product property of $\alpha$-stable distributions: If X and Y are independent random variables with $\lambda_1 \sim S_{\alpha/2}(1, 1, 0)$ and $\lambda_2 \sim S_2(1,0,0) = \mathcal{N}(0,1)$, then $\lambda_1 \lambda_2 \sim S_\alpha(1, 0, 0)$.
+For $\beta = 0$, we have a convenient Scale Mixture of Normals (SMiN) representation based off the product property of $\alpha$-stable distributions: If X and Y are independent random variables with $\lambda_t \sim S_{\alpha/2}(1, 1, 0)$ and $\eta_t \sim S_2(1,0,0) = \mathcal{N}(0,1)$, then $\lambda_t \eta_t \sim S_\alpha(1, 0, 0)$.
 
 We can then convert the discretised state space model specified in \autoref{eq:2__2__1__drift_corrected_simple_PF} into SMiN form as specified in \autoref{eq:2__2__2__RBPF_model} below.
 
@@ -15,7 +15,7 @@ We can then convert the discretised state space model specified in \autoref{eq:2
         \begin{bmatrix}
         x_{1,t+\delta t} \\ x_{2,t + \delta_t}
         \end{bmatrix}
-    }_{\mathbf{S_{t + \delta t}}}
+    }_{\mathbf{x_{t + \delta t}}}
     =
     \underbrace{
         \begin{bmatrix}
@@ -26,45 +26,47 @@ We can then convert the discretised state space model specified in \autoref{eq:2
         \begin{bmatrix}
         x_{1,t} \\ x_{2,t}
         \end{bmatrix}
-    }_{\mathbf{S_t}}
+    }_{\mathbf{x_t}}
     + 
     \underbrace{
         \begin{bmatrix}
-        0 \\ \sigma_t \sqrt{\lambda_{1, t-1}}
+        0 \\ \sigma_{\delta t}
         \end{bmatrix}
-    }_{\mathbf{b}} \lambda_{2, t};
-    \qquad \lambda_{2,t} \sim \mathcal{N}(0,1) \text{,   } \lambda_{1,t} \sim S_{\alpha/2}(1,1,0)
+    }_{\mathbf{b}} \sqrt{\lambda_{t + \delta t}} \eta_{t + \delta t} ;
+    \qquad \eta_{t + \delta t} \sim \mathcal{N}(0,1) \text{,   } \lambda_{t + \delta t} \sim S_{\alpha/2}(1,1,0)
     \label{eq:2__2__2__RBPF_model}
 \end{equation}
 
-This means that conditional upon us observing $\lambda_1$, $\lambda_2$ is gaussian, making inference much more tractable. We exploit this fact by designing a Rao-Blackwellised Particle Filter to sample $\lambda_1$ by using a simple particle filter, and propogating the states using a Kalman Filter conditioned upon the sampled $\lambda_1$ of the particle. 
+This means that conditional upon us observing $\lambda_{t + \delta t}$, $\bvec{x}_{t + \delta t}$ is gaussian, making inference much more tractable. We exploit this fact by designing a Rao-Blackwellised Particle Filter to sample $\lambda_{t + \delta t}$ by using a simple particle filter, and propogating the states using a Kalman Filter conditioned upon the sampled $\lambda_{t + \delta t}$ of the particle. 
 
-We take a short detour to properly formulate the inference problem using the SMiN representation here. In the inference problem, we are seeking to infer the state variables $\mathbf{s}_t$ given the observations $y_t$. We assume model dynamics as follows:
+We take a short detour to properly formulate the inference problem using the SMiN representation here. In the inference problem, we are seeking to infer the state variables $\mathbf{x}_{t + \delta t}$ given the observations $y_{t + \delta t}$. Changing indexes using $k = t + \delta t, k-1 = t$, to reflect the discretised nature of the problem, we assume model dynamics as follows:
 
 \begin{eqnarray}
-    \mathbf{s}_{t} & = & \mathbf{A} \mathbf{s}_{t - \delta t} + \mathbf{b}\sqrt{\lambda_t} \eta_t \notag \\
-    y_t  & = & \mathbf{C} \mathbf{s}_t + d \epsilon_t \\
-    \lambda_t & \sim & S_{\alpha / 2}(1,1,0) \notag \\
-    \eta_t, \epsilon_t & \sim & \mathcal{N}(0,1) \notag 
+    \mathbf{x}_k & = & \mathbf{A} \mathbf{x}_{k-1} + \mathbf{b} \sqrt{\lambda_k} \eta_k \notag \\
+    y_k  & = & \mathbf{C} \mathbf{x}_k + d \epsilon_k \\
+    \lambda_k & \sim & S_{\alpha / 2}(1,1,0) \notag \\
+    \eta_k, \epsilon_k & \sim & \mathcal{N}(0,1) \notag
+    \label{eq:2_2_2_model_dynamics} 
 \end{eqnarray}
 
-It will also be useful to use the following expression for $y_t$:
+It will also be useful to use the following expression for $y_k$:
 
 \begin{eqnarray}
-    y_t & = & \mathbf{CA} \mathbf{s}_{t - \delta t} + \underbrace{
+    y_k & = & \mathbf{CA} \mathbf{x}_{k-1} + \underbrace{
         \begin{bmatrix}
-            \mathbf{Cb} \sqrt{\lambda_t} & d
+            \mathbf{Cb} \sqrt{\lambda_k} & d
         \end{bmatrix}
-    }_{\mathbf{e}_t} \underbrace{
+    }_{\mathbf{e}_k} \underbrace{
         \begin{bmatrix}
-        \eta_t \\ \epsilon_t
+        \eta_k \\ \epsilon_k
         \end{bmatrix}
-    }_{\mathbf{n_t}} \\
-    \mathbf{n}_t & \sim & \mathcal{N} \left(
+    }_{\mathbf{n_k}} \\
+    \mathbf{n}_k & \sim & \mathcal{N} \left(
         % \begin{bmatrix}0 \\ 0\end{bmatrix}
         \mathbf{0}
         , \mathbf{I} \right) \notag \\
-    \lambda_t & \sim & S_{\alpha / 2}(1,1,0) \notag
+    \lambda_k & \sim & S_{\alpha / 2}(1,1,0) \notag
+    \label{eq:2_2_2_model_dynamics_y} 
 \end{eqnarray}
 
 \ToFix{This transforms our state equation form into a (nearly?) $\alpha$-stable sub-gaussian form. (This is NOT in $\alpha$-stable sub-gaussian form, see:  \href{https://statistik.econ.kit.edu/download/doc_secure1/SubGaussianDAX30-KRHF-FV.pdf}{$<$ $\alpha$-stable sub-gaussian definition $>$} for reference) }
@@ -73,119 +75,98 @@ It will also be useful to use the following expression for $y_t$:
 
 For Rao-Blackwellised Particle Filtering, we partition the state vector into gaussian and non-gaussian components. We can then use standard Kalman Filtering to obtain optimal estimates for the gaussian state components, after obtaining estimates for the non-gaussian state components.  
 
-We partition the state from \autoref{eq:2__2__2__RBPF_model} as $\vec{s}_t = (\vec{x}_t, \lambda_t).
+
+At each time step $k$, the Rao-Blackwellised Particle Filter produces for each time step $k$ a set of weighted samples $\left\{ w_k^{(i)}, \lambda_k^{(i)}, \mu_k^{(i)}, \Sigma_k^{(i)} : i = 1,...,N \right\}$ according to: 
 
 
+\begin{enumerate}
+	\item Draw new latent variables $\lambda_t^{(i)}$ for each particle in $i = 1,...,N$ from the corresponding importance distribution: 
+	
+	\begin{equation}
+		\lambda_k^{(i)} \sim \pi(\lambda_k | \lambda_{0:k-1}^{(i)}, y_{1:k})
+	\end{equation}
+	
+	For the generic RBPF, we choose the importance distribution: 
+	
+	\begin{equation}
+		\pi(\lambda_k | \lambda_{0:k-1}^{(i)}, y_{1:k}) = p(\lambda_k | \lambda_{0:k-1}^{(i)}) = \SAhalf(\lambda_k | 1, 1, 0)
+		\label{eq:2__2__2__RBPF_importance_dist}
+	\end{equation}
+	
+	\item Calculate new weights as follows:
+	
+	\begin{equation}
+		w_k^{(i)} \propto w_{k-1}^{(i)} \frac{p(y_k | \lambda_{0:k}^{(i)}, y_{1:k-1}) p(\lambda_k^{(i)} | \lambda_{k-1}^{(i)})}{\pi(\lambda_k^{(i)} | s_{0:k-1}^{(i)}, y_{1:k})}
+	\end{equation}
+	
+	Here, the likelihood term $p(y_k | u_{0:k}^{(i)}, y_{1:k-1})$ is obtained using the predictive error decomposition from the Kalman Filter:
+	
+	Kalman Filtering Prediction Step: 
+	\begin{align}
+		& & p(\bvec{x}_{0:k} | \lambda_{0:k}^{(i)}, y_{1:k-1} ) &= \mathcal{N}(\bvec{x}_{k} | \mu_k^{-(i)}, \Sigma_k^{-(i)})&& \\
+		& \text{where: } & \mu_k^{-(i)} &= \bvec{A}\mu_{k-1}^{(i)}&& \notag\\
+		& & \Sigma_k^{-(i)} & = \bvec{A}\Sigma_{k-1}^{-(i)} \bvec{A}^T + \bvec{b}^T\bvec{b} \lambda_{k}^{(i)}&& \notag
+	\end{align}
+	
+	Predictive Error Decomposition:
+	\begin{align}
+		p(y_k | \lambda_{0:k}^{(i)}, y_{1:k-1}) &= \int p(y_k | \lambda_{0:k}^{(i)}, \bvec{x}_{0:k}) p( \bvec{x}_{0:k} | \lambda_{0:k}^{(i)}, y_{1:k-1}) d\bvec{x}_{0:k}\notag\\
+		&= \mathcal{N}(y_k | \bvec{C} \mu_{k}^{-(i)}, \bvec{C} \Sigma_k^{-(i)} \bvec{C}^T  + d^2)
+	\end{align}
+	
+	\item Perform Kalman Filter updates for each of the particles conditional on the drawn latent variables $\lambda_k^{(i)}$.
+	
+	\begin{align}
+		& & p(\bvec{x}_{0:k} | \lambda_{0:k}^{(i)}, y_{1:k}) &= \mathcal{N}(\bvec{x}_k | \mu_k, \Sigma_k) &&\\
+		& \text{where: } & \bvec{v}_k^{(i)} &= y_k - \bvec{C}\mu_k^{(i)}&& \notag\\
+		&& \bvec{S}_k^{(i)} &= \bvec{C}\Sigma_k^{-(i)}\bvec{C}^T + d^2&& \notag\\    
+		&& \bvec{K}_k^{(i)} &= \Sigma_k^{-(i)}\bvec{C}^T \bvec{S}_k^{-1}&&\notag\\ 
+		\notag\\
+		&& \mu_k^{(i)} &= \mu_k^{-(i)} + \bvec{K}_k^{(i)} \bvec{v}_k^{(i)}&& \notag\\
+		&&\Sigma_k^{(i)} &= \Sigma_k^{-(i)} - \bvec{K}_k^{(i)}\bvec{S}_k^{(i)} [\bvec{K}_k^{(i)}]^T&& \notag
+	\end{align}
+	
+	
+	\item Perform multinomial resampling to increase the number of effective particles.
+	
+\end{enumerate}
 
+\textbf{Potential Problems with the RBPF}
 
+When $\vt$ is large, the RBPF is often unable to get a good importance sampling estimate for $\lambda_k$.
 
-Again, detailed treatment of the Rao-Blackwellised Particle Filter is omitted, but a short summary of the recursive steps taken every time step are presented below. 
+When $\vt$ is large, this implies that $\lambda_k$ is likely to be large also. (See Figure \ref{fig:2__2__2__rejection_sampling_priors}, noting that $p(\lambda_k | \vt) \propto \SAhalf(\lambda_k)\mathcal{N}(\vt | \lambda_k)$). As a large $\lambda_k$ lies in the low probability right tail of the particle proposal distribution given by \autoref{eq:2__2__2__RBPF_importance_dist}, very few particles $\lambda_k^{(i)}$ are generated from the particle proposal distribution which are close to the actual $\lambda_k$. 
 
+This problem is exacerbated by the fact that the $\alpha$ parameter of the proposal distribution is half of the original $\alpha$. This causes the tails of the proposal distribution is to decay very slowly, increasing the number of particles needed to give a good importance sampling estimate. 
 
+This results in sample impoverishment, whereby there are only a few effective particles with non-negligible weights, which causes the performance of the RBPF to be slightly worse for very low numbers of particles. 
 
+One method of quantifying sample impoverishment in a particle filter (whilst adjusting for number of particles) is by measuring the entropy of the particle filter weights given in \autoref{eq:2__2__2__entropy}. 
 
+\begin{equation}
+	H(w) = \sum_{i=1}^N w_i \log(w_i)  \qquad \text{where: } \sum_{i=1}^N w_i = 1 \label{eq:2__2__2__entropy}
+\end{equation}
+
+In order to compare the entropy of the particle weights across different number of particles, we instead use a normalised entropy measure given in \autoref{eq:2__2__2__normalised_entropy}.This normalised entropy measures the change in entropy between a set of weights with uniform distribution (an ideal "optimized" set of weights) and a set of weights with a non-uniform distribution, and is scaled to be independent of the number of particles, as well as the base used in calculating the entropy.
+
+\begin{equation}
+H_n(w) = \frac{1}{\log_b(N)}\sum_{i=1}^N w_i \log_b(w_i)  \qquad \text{where: } \sum_{i=1}^N w_i = 1   \label{eq:2__2__2__normalised_entropy}
+\end{equation}
+
+We demonstrate the problem of sample impoverishment by simulating a single time step of the particle filter, for varying values of $\vt$. Fixing $\mu_k^{(i)}$, $\Sigma_k^{(i)}$ whilst varying $y_k$ and $N$, we simulate one time step of the RBPF update step described above and present the normalised entropy of the particle filter weights obtained in Figure \ref{fig:2__2__2__sample_impoverishment}. We see that the normalised entropy of the particle filter weights drops rapidly for large $\vt$, and that the as $N$ increases, the normalised entropy of the particle filter weights is more resistant to sample impoverishment at large values of $\vt$ as expected. 
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=12.0cm]{../plots/2__2__2__sample_impoverishment.png}
+	\caption{Change in normalised entropy of PF weights as $\vt$ and $N$ are varied}
+	\label{fig:2__2__2__sample_impoverishment}
+\end{figure}
+
+\textbf{Dense Sampling}
 
 
 
 \textbf{Adaptive Sampling}
-
-One way of attempting to improve the performance of the RBPF is to form a better importance sampling distribution. In this section, we seek to form a better importance sampling distribution for $\pi(\lambda_t | y_{1:t}, \lambda_{0:t-1})$.
-
-For optimality, we want $\pi(\lambda_t | y_{1:t} \lambda_{0:t-1}) \approx p(\lambda_t | y_{1:t}, \lambda_{0:t-1})$.
-
-
-It is hard to formulate an analytical form for this density directly. To get around this, we can instead form the analytical joint distribution for $p(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})$. The complete derivation is given in the appendix, with the key steps highlighted below. 
-
-We first augment the probability density given above with $x_{0:t-1}$. This allows us to use results from the previously-performed Kalman Filter step.
-
-\begin{eqnarray}
-    & & p(y_t. \lambda_t, x_{0:t-1} | y_{1:t-1}, \lambda_{0:t-1}) \notag \\
-    & \propto & p(y_t | y_{1:t-1}, \lambda_{0:t}, x_{0:t-1}) p(x_{0:t-1} | y_{1:t-1}, \lambda_{0:t}) p(\lambda_t | \lambda_{0:t-1}) \notag \\
-    & \approx & p(y_t | y_{1:t-1}, \lambda_{0:t}, x_{0:t-1}) p(x_{0:t-1} | y_{1:t-1}, \lambda_{0:t-1}) p(\lambda_t | \lambda_{0:t-1}) \notag \\
-    & = & \Gaussian (y_t | \mathbf{CAx}_{t-1}, \mathbf{ee}^T) \Gaussian (\mathbf{x}_{0:t-1} | \mathbf{\mu}_k, \mathbf{\Sigma}_k) S_{\alpha/2}(1,1,0) \notag \\
-    & = & \Gaussian \left(
-        \begin{bmatrix} y_t \\ \vec{x}_{t-1}  \end{bmatrix} | 
-        \begin{bmatrix} \vec{CAx}_{t-1}  \end{bmatrix},
-        \begin{bmatrix} \vec{ee}^T + (\vec{CA})\vec{\Sigma}_k(\vec{CA})^T & \vec{CA\Sigma}_k \\ \vec{\Sigma}_k(\vec{CA})^T & \vec{\Sigma}_k \end{bmatrix} 
-    \right)  S_{\alpha/2}(1,1,0) \notag
-\end{eqnarray}
-
-We can then obtain the required density $p(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})$ by marginalising out $x_{0:t-1}.
-
-
-
-\OptionTwo{
-    It is hard to formulate an analytical form for this density directly. To get around this, we can instead form the analytical joint distribution for $p(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})$:
-}
-
-
-\begin{equation}
-    p(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1}) = \mathcal{N}(y_t | \mathbf{CA} \mu_k , (\mathbf{Cb})(\mathbf{Cb})^T\lambda_t + d^2) S_{\alpha/2} (\lambda_t | 1,1,0) \label{eq:2__2__2__analytical_dist_original}
-\end{equation}
-
-By fixing the value of $y_t$ in \autoref{eq:2__2__2__analytical_dist_original}, we can obtain the desired distribution $p(\lambda_t | y_{1:t}, \lambda_{0:t-1})$. In general, there is no closed form expression for this distribution. 
-
-This formulation of the joint distribution also gives us an alternative interpretation for the sampling density $p(\lambda_t | y_{1:t}, \lambda_{0:t-1})$. 
-
-We can reinterpret this as finding the posterior density of $\lambda_t$
-We can interpret this density as the posterior density of the variance of a normal distribution ($\lambda_t$)
-
-
-
-However, there are a variety of methods to draw samples from this distribution.
-
-\begin{enumerate}
-    \item \textbf{Rejection Sampling}
-    
-    We adapt the methods of Godsill and Kuruoglu, 1999 to draw samples from this distribution.
-    
-    The target distribution for the rejection sampling scheme is given by:
-    
-    $$ f(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1}) = \mathcal{N}(y_t | \mathbf{CA} \mu_k , (\mathbf{Cb})(\mathbf{Cb})^T\lambda_t + d^2) S_{\alpha/2} (\lambda_t | 1,1,0) $$
-    
-    
-    \OptionOne{
-        
-        Using a proposal distribution $g(\lambda_t | y_{1:t}, \lambda_{0:t-1}) = S_{\alpha/2}(1,1,0)$, we can bound the probability density from above using: 
-        
-        \begin{eqnarray}
-            M & \geq & \frac{f(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})}{g(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})} \notag \\
-            & = & \frac{1}{\sqrt{2 \pi v_t^2}} \exp (-0.5)
-        \end{eqnarray}
-    
-    }
-    
-    \OptionTwo{
-    
-        Using a proposal distribution $g(\lambda_t | y_{1:t}, \lambda_{0:t-1}) = S_{\alpha/2}(1,1,0)$, we can use the likelihood as a valid rejection function as it is bounded from the above:
-        
-        \begin{eqnarray}
-            \mathcal{N}(...) & \geq & \frac{f(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})}{g(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})} \notag \\
-            & = & \frac{1}{\sqrt{2 \pi v_t^2}} \exp (-0.5)
-        \end{eqnarray}
-    
-    }
-    
-    This gives a suitable rejection sampler as:
-    
-    \begin{enumerate}
-        \item Draw $\lambda_t \sim S_{\alpha_2}(1,1,0)$
-        \item Draw $ u \sim U \left( 0, \frac{1}{\sqrt{2 \pi v_t^2}} \exp (-0.5) \right)$
-        \item If $u > \mathcal{N}(....)$, reject $\lambda_t$ and go to Step (a)
-    \end{enumerate}
-    
-\end{enumerate}
-
-
-
-
-\begin{equation}
-    p(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1}) = \mathcal{N}(y_t - \mathbf{CA}\mathbf{\mu}_k | 0, \lambda_t')S_\frac{\alpha}{2}(\lambda_t' | (\mathbf{Cb})(\mathbf{Cb})^T, 1, \mathbf{dd}^T + \mathbf{CA\Sigma}_k(\mathbf{CA})^T)
-    \label{eq:2__2__2__analytical_dist}
-\end{equation}
-
-In general, we cannot sample from \autoref{eq:2__2__2__analytical_dist} exactly. 
-
 
 
 \end{document}

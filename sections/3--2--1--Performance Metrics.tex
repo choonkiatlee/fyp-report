@@ -1,0 +1,58 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+
+\subsubsection{Statistical Metrics}
+
+\textbf{Mean Square Error}
+	
+The mean square error (MSE) is used to compare forecasts with the real future observed state. This allows us to assess the predictive power of the inference algorithms that we are testing. 
+	
+The mean square error is defined over all time points K as: 
+
+\begin{equation}
+	MSE = \mathbb{E}(e^2) = \frac{1}{K} \sum_{i=1}^{K} (y_i - \hat{y}_i)^2
+\end{equation}
+	
+	
+\subsubsection{Actual Trading Performance Metrics} 
+
+As we are interested in optimising the inference algorithms described in this paper for practical use, we want to select a performance metric that more closely reflects the actual results achieved if the filtering model is used as the backend for a real trading system. 
+
+
+\textbf{Binary Prediction Error}
+
+One rudimentary trading algorithm that could be employed to transform the filtered state into actual trading signals simply invests a set amount of money if the predicted return is positive, and shorts the same amount if the predicted return is negative.
+
+This simple trading algorithm will generate profits if the sign of the predicted returns matches that the sign of the actual returns.
+
+Thus, one metric that we could use to measure the performance of the trading system looks to see how many times the sign of the predicted returns matches the sign of the actual returns (Binary Prediction Error).
+ 
+This provides a more realistic measure of the profitability of this particular trading system. A binary prediction error $BPE < 0.5$ indicates that the filtered signal is predicting correct trade decisions more often than not.
+
+We define the binary prediction error formally as: 
+
+\begin{align}
+	&& BPE & = \frac{1}{N} \sum_{i=1}^N b_i && \notag \\
+	& where: & b_i &= \begin{cases}
+		0 & \text{sign}(y_i) = \text{sign}(\hat{y}_i) \\
+		1 & \text{otherwise}
+	\end{cases}
+\end{align}
+
+\textbf{Sharpe Ratio}
+
+Instead of the simple trading algorithm detailed above, we might instead want to use more sophisticated ways of  converting the filtered signal into an actual trading signal. 
+
+We can quantify the trading profitability of this actual trading signal by running the trading algorithm and obtaining the actual backtested realised returns. Using these realised profits, we can use the \textit{sharpe ratio} of the actual realised profits to objectively evaluate the performance of the algorithm. 
+
+The sharpe ratio measures the average return earned per unit of risk(volatility) undertaken, and is defined by: 
+
+\begin{equation}
+	\text{Sharpe Ratio} = \frac{\text{Mean of Portfolio Returns}}{\text{Standard Deviation of Portfolio Returns}}
+\end{equation}
+
+Because the sharpe ratio is defined in units of risk, it can help to explain if the returns obtained are due to a profitable trading signal or simply as a result of taking on too much risk. The greater the sharpe ratio, the better its risk-adjusted performance, hence indicating that the trading signal is more profitable. 
+	
+\end{document}

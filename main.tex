@@ -49,15 +49,22 @@
 }
 
 \newcommand{\OptionTwo}[1]{
-     \begingroup\color{green} 
+     \begingroup\color{blue} 
         \emph{Option 2:} 
         #1 
     \endgroup
 }
 
+\newcommand{\asd}{$\alpha$-stable distribution }
+
+\newcommand{\vt}{y_k - \bvec{CA\mu}_{k-1}^{(i)}}
+
+\newcommand{\SAhalf}{S_{\alpha/2}}
+
 %--------------------- Math Commands for Distributions -------------%
 \newcommand\iid{i.i.d.}
 \newcommand{\Gaussian}{\mathcal{N}}
+\renewcommand{\vec}[1]{{\bf #1}}
 %\renewcommand*{\v}[1]{\mathbf{#1}}   % Short for "vector"
 
 %--------------------- Bibliography ---------------------------------%
@@ -65,6 +72,18 @@
     sorting=none
 ]{biblatex}
 \addbibresource{bib.bib}
+
+%%% Default start and end for each subfile
+\AtBeginDocument{%
+}
+
+\AtEndDocument{%
+	\printbibliography
+	\listoffigures
+	\listoftables
+	\newpage
+%	\printacronyms[include-classes=abbrev,name=Acronyms]
+}
 
 %-------------------- Selective Compilation Booleans ----------------%
 \usepackage{ifthen}
@@ -107,9 +126,33 @@
 \tableofcontents
 
 % Selective Compilation Flags %
+
+ \setboolean{display1}{true}
+
  \setboolean{display2_1}{true}
-% \setboolean{display2_2_1}{true}
-%\setboolean{display2_2_2}{true}
+\setboolean{display2_1_1}{true}
+\setboolean{display2_2_2}{true}
+\setboolean{display2_2_3}{true}
+\setboolean{display2_2_4}{true}
+\setboolean{display2_2_5}{true}
+
+\setboolean{display3_1_1}{true}
+
+\setboolean{display3_2_1}{true}
+
+
+\setboolean{display3_2_1}{true}
+\setboolean{display3_2_2}{true}
+\setboolean{display3_2_3}{true}
+\setboolean{display3_2_4}{true}
+
+\setboolean{display3_4_1}{true}
+%\setboolean{display3_5_1}{true}
+
+\setboolean{display4_1_1}{true}
+\setboolean{display4_1_2}{true}
+%\setboolean{display4_1_1}{true}
+
 
 %\import{sections/}{1--introduction}
 
@@ -118,29 +161,78 @@
 
 \section{Theory}
 
-    \subsection{Modelling}
+    \subsection{Modelling} \label{sec:modelling}
     \ifthenelse{\boolean{display2_1}}{\subfile{sections/2--1--modelling}}{}
     
-    \subsection{Inference}
+    \subsection{Notes on the tail approximations for alpha stable distribution} \label{sec:tail_approx}
+    \ifthenelse{\boolean{display2_1_1}}{\subfile{sections/2--1--1--tail-approx}}{}
     
-    \subsubsection{Simple Particle Filter}
-    \ifthenelse{\boolean{display2_2_1}}{\subfile{sections/2--2--1--simple-particle-filter}}{}
+    \subsection{Inference} \label{sec:inference}
     
-    \subsubsection{Rao-Blackwellised Particle Filter (RBPF)}
-    \ifthenelse{\boolean{display2_2_2}}{\subfile{sections/2--2--2--RBPF}}{}
+    \subsubsection{Generic Bootstrap Particle Filter} \label{sec:generic_bootstrap_pf}
+    \ifthenelse{\boolean{display2_2_1}}{\subfile{sections/2--2--1--generic-bootstrap-particle-filter}}{}
+%    \ifthenelse{\boolean{display2_2_1}}{\subfile{sections/2--2--1--simple-particle-filter}}{}
+
+	\subsubsection{Drift-Corrected Bootstrap Particle Filter} \label{sec:drift_corrected_pf}
+	\ifthenelse{\boolean{display2_2_2}}{\subfile{sections/2--2--2--drift-corrected-pf}}{}
     
-    \subsubsection{Sequential Markov Chain Monte Carlo (SMCMC)}
+    \subsubsection{Generic Rao-Blackwellised Particle Filter (RBPF)} \label{sec:generic_RBPF}
+    \ifthenelse{\boolean{display2_2_3}}{\subfile{sections/2--2--2--RBPF}}{}
+    
+    \subsubsection{Dense Sampling Rao-Blackwellised Particle Filter (RBPF)} \label{sec:dense_sampling_RBPF}
+    \ifthenelse{\boolean{display2_2_4}}{\subfile{sections/2--2--4--dense-sampling-rbpf}}{}
+    
+    \subsubsection{Adaptive Sampling Rao-Blackwellised Particle Filter (RBPF)} \label{sec:adaptive_sampling_RBPF}
+    \ifthenelse{\boolean{display2_2_5}}{\subfile{sections/2--2--5--adaptive-sampling-rbpf}}{}
+    
+%    \subsubsection{Sequential Markov Chain Monte Carlo (SMCMC)}
+    
+%    \subsection{Parameter Estimation}
+
+\section{Experimental Design}
+
+	\subsection{Simulated Data} \label{sec:experimental_simulated}
+	\ifthenelse{\boolean{display3_1_1}}{\subfile{sections/3--1--1--Simulated_data}}{}
+	
+	\subsection{Performance Metrics}\label{sec:experimental_performance}
+	\ifthenelse{\boolean{display3_2_1}}{\subfile{sections/3--2--1--Performance Metrics}}{}
+	
+	
+	\subsection{Hyperparameter selection} \label{sec:experimental_hyperparameter}
+
+	
+	\subsection{Trading Algorithm}
+	
+	
+	
+	
+	
+
+\section{Experimental Results and Discussion}
+
+    \subsection{Comparison of inference algorithms} \label{sec:results_comparison}
+    
+    \ifthenelse{\boolean{display4_1_1}}{\subfile{sections/4--1--inference-comparison}}{}
+    
+    	\subsubsection{Boostrap Particle Filters} \label{sec:results_drift_corrected}
+    	\ifthenelse{\boolean{display4_1_1}}{\subfile{sections/4--1--1--Drift-corrected-particle-filter}}{}
+    	
+    	\subsection{Rao-Blackwellised Particle Filters} \label{sec:results_rbpf}
+    	\ifthenelse{\boolean{display4_1_2}}{\subfile{sections/4--1--2--RBPF}}{}
     
     \subsection{Parameter Estimation}
-
-
-\section{Experimental Results}
-
-    \subsection{Simulation Results}
-    \subsection{Comparison of inference algorithms}
-    \subsection{Parameter Estimation}
-    \subsection{Performance on actual data}
+    
+    \subsection{Computational Costs}
+%   	\ifthenelse{\boolean{display4_3_1}}{\subfile{sections/4--3--1--computational-costs}}{}
+  
+    
+    \subsection{Exploration of High Frequency Financial Timeseries}
+    
+    \ifthenelse{\boolean{display3_4_1}}{\subfile{sections/3--4--1--HF_exploration}}{}
+    
     \subsection{Trading Simulations}
+    
+    \ifthenelse{\boolean{display3_5_1}}{\subfile{sections/3--5--1--Trading}}{}
 
 
 \section{Discussion}
@@ -151,7 +243,7 @@
 
 \section{Conclusion}
 
-\printbibliography[title={References},heading=bibnumbered]
+	\printbibliography[title={References},heading=bibnumbered]
 \end{document}
 
 
