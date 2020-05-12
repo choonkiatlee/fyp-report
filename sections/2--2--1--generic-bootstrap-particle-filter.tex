@@ -2,11 +2,50 @@
 
 \begin{document}
 	
-With the continuous-time probability density from \autoref{eq:2__1__state_transition_density}, we can perform inference using a simple bootstrap particle filter. A brief description of the bootstrap particle filter is given in: 
+With the continuous-time probability density from \autoref{eq:2__1__state_transition_density}, we can perform inference using a simple bootstrap particle filter. 
 
-However, the state transition density is only tractable for the single dimensional model given in Equation \autoref{eq:2__1__single_dim_model}. Thus, we first perform inference on the single dimensional returns($x_1$) model, and generate the price ($x_2$) process through numerical integration. 
+The bootstrap particle filter produces for each time step $k$ a set of weighted samples $\left\{	w_k^{(i)}, \bvec{x}_k^{(i)}	 \right\}$ according to: 
 
-While this simple method manages to remove noise significantly in the returns process, it suffers greatly from drift. Small errors in the inference of the returns process are compounded, leading to the inferred price process deviating from the ground truth (See section \tofix{X}).
+\begin{enumerate}
+	\item Draw new samples $\bvec{x}_k^{(i)}$ from the importance distribution: 
+	
+	\begin{equation}
+		\bvec{x}_k^{(i)} \sim \pi(\bvec{x}_k | \bvec{x}_{k-1}^{(i)}, y_{1:k}). i=1,...,N
+	\end{equation}
+	
+	In the special case of the bootstrap particle filter, we choose:
+	
+	\begin{equation}
+		\pi(\bvec{x}_k | \bvec{x}_{k-1}^{(i)}, y_{1:k}) = p(\bvec{x}_k | \bvec{x}_{k-1}^{(i)} )
+	\end{equation}
+	
+	\item Calculate new weights according to: 
+	
+	\begin{align}
+		w_k^{(i)} &\propto w_{k-1}^{(i)} \frac{p(y_k | \bvec{x}_k^{(i)})p(\bvec{x}_k^{(i)} | \bvec{x}_{k-1}^{(i)}) }{  	\pi(\bvec{x}_k | \bvec{x}_{k-1}^{(i)}, y_{1:k}) } \\
+		&= w_{k-1}^{(i)} p(y_k | \bvec{x}_k^{(i)}) \notag
+	\end{align}
 
+	\item Perform resampling to increase the number of particles with effective weights by selecting $\bvec{x}^{(i)}$ with probability $w_k^{(i)}$. This corresponds to approximating the posterior using a point mass distribution given by \autoref{eq:2__2__1__approximate_posterior},then selecting a sample from the approximated posterior distribution. 
+	
+	\begin{equation}
+		p(\bvec{x} _{0:k} | y_{1:k} ) \approx \sum_{i=1}^N w_k^{(i)} \delta (\bvec{x}_{0:k} - \bvec{x}_{0:k}^{(i)})
+		\label{eq:2__2__1__approximate_posterior}
+	\end{equation}
+	
+\end{enumerate}
+
+The exact state transition density is only tractable for the single dimensional model given in Equation \autoref{eq:2__1__single_dim_model}. Thus, we first perform inference on the single dimensional returns($x_2$) model, and generate the price ($x_1$) process through numerical integration. The observations provided to the model are the observed price differences $s_k = y_{k+1} - y_{k}$
+
+This corresponds to the following one dimensional model:
+
+\begin{align}
+	x_{2,k} &= \underbrace{\exp\left( \theta(t-s) \right)}_{A}  x_{2,k-1} + \underbrace{\sigma_{\delta t}}_{b} L_k \notag \\
+	s_k &= x_{2,k} + \underbrace{\sigma_{obs}}_{d} \eta_k \notag\\
+	x_{1,k} &= x_{1,k-1} + (\delta t) s_{k-1}
+\end{align}
+
+
+While this simple method manages to remove noise significantly in the returns process, it suffers greatly from drift. Small errors in the inference of the returns process are compounded, leading to the inferred price process deviating from the ground truth (See \autoref{sec:results_drift_corrected}).
 
 \end{document}

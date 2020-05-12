@@ -2,33 +2,34 @@
 
 \begin{document}
 
-One way of attempting to improve the performance of the RBPF is to form a better importance sampling distribution. In this section, we seek to form a better importance sampling distribution for $\pi(\lambda_t | y_{1:t}, \lambda_{0:t-1})$.
+One way of attempting to improve the performance of the RBPF is to form a better importance sampling distribution. In this section, we seek to form a better importance sampling distribution for $\pi(\lambda_k | y_{1:t}, \lambda_{0:k-1})$.
 
-For optimality, we want $\pi(\lambda_t | y_{1:t} \lambda_{0:t-1}^{(i)}) \approx p(\lambda_t | y_{1:t}, \lambda_{0:t-1}^{(i)})$.
+For optimality, we want $\pi(\lambda_k | y_{1:t} \lambda_{0:k-1}^{(i)}) \approx p(\lambda_k | y_{1:t}, \lambda_{0:k-1}^{(i)})$.
 
 
-It is hard to formulate an analytical form for this density directly. To get around this, we can instead form the analytical joint distribution for $p(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1}^{(i)})$. The complete derivation is given in the appendix, with the key steps highlighted below. 
+It is hard to formulate an analytical form for this density directly. To get around this, we can instead form the analytical joint distribution for $p(y_k, \lambda_k | y_{1:k-1}, \lambda_{0:k-1}^{(i)})$. 
+%The complete derivation is given in the appendix, with the key steps highlighted below. 
 
-We first augment the probability density given above with $x_{0:t-1}$. This allows us to use results from the previously-performed Kalman Filter step.
+We first augment the probability density given above with $x_{0:k-1}$. This allows us to use results from the previously-performed Kalman Filter step, $\mu_{k-1}^{(i)}$ and $\Sigma_{k-1}^{(i)}$.
 
 \begin{eqnarray}
-& & p(y_t. \lambda_t, x_{0:t-1} | y_{1:t-1}, \lambda_{0:t-1}^{(i)}) \notag \\
-& \propto & p(y_t | y_{1:t-1}, \lambda_{0:t}^{(i)}, x_{0:t-1}) p(x_{0:t-1} | y_{1:t-1}, \lambda_{0:t}^{(i)}) p(\lambda_t^{(i)} | \lambda_{0:t-1}^{(i)}) \notag \\
-& \approx & p(y_t | y_{1:t-1}, \lambda_{0:t}^{(i)}, x_{0:t-1}) p(x_{0:t-1} | y_{1:t-1}, \lambda_{0:t-1}^{(i)}) p(\lambda_t | \lambda_{0:t-1}) \notag \\
-& = & \Gaussian (y_t | \mathbf{CAx}_{t-1}, \mathbf{ee}^T) \Gaussian (\mathbf{x}_{0:t-1} | \mathbf{\mu}_k^{(i)}, \mathbf{\Sigma}_k^{(i)}) S_{\alpha/2}(1,1,0) \notag \\
+& & p(y_k, \lambda_k, x_{0:k-1} | y_{1:k-1}, \lambda_{0:k-1}^{(i)}) \notag \\
+& \propto & p(y_k | y_{1:k-1}, \lambda_{0:k}^{(i)}, x_{0:k-1}) p(x_{0:k-1} | y_{1:k-1}, \lambda_{0:k}^{(i)}) p(\lambda_k^{(i)} | \lambda_{0:k-1}^{(i)}) \notag \\
+& \approx & p(y_k | y_{1:k-1}, \lambda_{0:k}^{(i)}, x_{0:k-1}) p(x_{0:k-1} | y_{1:k-1}, \lambda_{0:k-1}^{(i)}) p(\lambda_k | \lambda_{0:k-1}) \notag \\
+& = & \Gaussian (y_k | \mathbf{CAx}_{k-1}, \mathbf{ee}^T) \Gaussian (\mathbf{x}_{0:k-1} | \bvec{\mu}_{k-1}^{(i)}, \mathbf{\Sigma}_{k-1}^{(i)}) S_{\alpha/2}(1,1,0) \notag \\
 & = & \Gaussian \left(
-\begin{bmatrix} y_t \\ \vec{x}_{t-1}  \end{bmatrix} | 
-\begin{bmatrix} \vec{CA\mu}_{k-1}^{(i)} \\ \mu_{k-1}^{(i)}  \end{bmatrix},
-\begin{bmatrix} \vec{ee}^T + (\vec{CA})\vec{\Sigma}_k^{(i)}(\vec{CA})^T & \vec{CA\Sigma}_k^{(i)} \\ \vec{\Sigma}_k^{(i)}(\vec{CA})^T & \vec{\Sigma}_k^{(i)} \end{bmatrix} 
+\begin{bmatrix} y_k \\ \bvec{x}_{k-1}  \end{bmatrix} | 
+\begin{bmatrix} \bvec{CA\mu}_{k-1}^{(i)} \\ \bvec{\mu}_{k-1}^{(i)}  \end{bmatrix},
+\begin{bmatrix} \bvec{ee}^T + (\bvec{CA})\bvec{\Sigma}_{k-1}^{(i)}(\bvec{CA})^T & \bvec{CA\Sigma}_{k-1}^{(i)} \\ \vec{\Sigma}_{k-1}^{(i)}(\vec{CA})^T & \vec{\Sigma}_{k-1}^{(i)} \end{bmatrix} 
 \right)  S_{\alpha/2}(1,1,0) \notag
 \end{eqnarray}
 
-We can then obtain the required density $p(y_t, \lambda_t^{(i)} | y_{1:t-1}, \lambda_{0:t-1})$ by marginalising out $x_{0:t-1}$: 
+We can then obtain the required density $p(y_k, \lambda_k^{(i)} | y_{1:k-1}, \lambda_{0:k-1})$ by marginalising out $x_{0:k-1}$: 
 
 \begin{align}
 p(y_k, \lambda_k | y_{1:k-1}, \lambda_{0:k-1}^{(i)}) &= \int p(y_k, \lambda_k, x_{0:k-1} | y_{1:k-1}, \lambda_{0:k-1}^{(i)}) d x_{0:k-1}\notag \\
-&=  \mathcal{N}(y_k | \mathbf{CA} \mu_k^{(i)} , (\mathbf{Cb})(\mathbf{Cb})^T\lambda_k + d^2 + (\vec{CA})\vec{\Sigma}_k^{(i)}(\vec{CA})^T) S_{\alpha/2} (\lambda_t | 1,1,0) \notag \\
-&= \mathcal{N}(y_k | \mathbf{CA} \mu_k^{(i)} , \sigma_\lambda \lambda_k + \mu_\lambda) S_{\alpha/2} (\lambda_t | 1,1,0)
+&=  \mathcal{N}(y_k | \mathbf{CA} \mu_{k-1}^{(i)} , (\mathbf{Cb})(\mathbf{Cb})^T\lambda_k + d^2 + (\vec{CA})\vec{\Sigma}_{k-1}^{(i)}(\vec{CA})^T) S_{\alpha/2} (\lambda_k | 1,1,0) \notag \\
+&= \mathcal{N}(y_k | \mathbf{CA} \mu_{k-1}^{(i)} , \sigma_\lambda \lambda_k + \mu_\lambda) S_{\alpha/2} (\lambda_k | 1,1,0)
 \label{eq:2__2__2__analytical_dist_original}
 \end{align}
 
@@ -42,9 +43,9 @@ where:
 
 By fixing the value of $y_k$ in \autoref{eq:2__2__2__analytical_dist_original}, we can obtain the desired distribution $p(\lambda_k | y_{1:k}, \lambda_{0:k-1})$. 
 
-This formulation of the joint distribution also gives us an alternative interpretation for the sampling density $p(\lambda_t | y_{1:t}, \lambda_{0:t-1})$. 
+This formulation of the joint distribution also gives us an alternative interpretation for the sampling density $p(\lambda_k | y_{1:k}, \lambda_{0:k-1})$. 
 
-We can reinterpret this as finding the posterior density of $\lambda_k$ given the observations $y_t - \textbf{CA}\mu_k$. The prior on $\lambda_k$ is the $\alpha$-stable proposal distribution $S_{\alpha/2} (\lambda_k | 1,1,0)$ while the likelihood is the unknown variance of a normal distribution ($\mathcal{N}(y_t | \mathbf{CA} \mu_k , \sigma_\lambda \lambda_t + \mu_\lambda)$).
+We can reinterpret this as finding the posterior density of $\lambda_k$ given the observations $y_k - \bvec{CA\mu}_{k-1}$. The prior on $\lambda_k$ is the $\alpha$-stable proposal distribution $S_{\alpha/2} (\lambda_k | 1,1,0)$ while the likelihood is the unknown variance of a normal distribution ($\mathcal{N}(y_k | \bvec{CA\mu}_{k-1} , \sigma_\lambda \lambda_k + \mu_\lambda)$).
 
 \textbf{Rejection Sampling}
 
@@ -55,35 +56,35 @@ We adapt the methods of \cite{godsill1999bayesian} to draw samples from this dis
 The target distribution for the rejection sampling scheme is given by:
 
 \begin{align}
-f(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1}^{(i)}) & = \mathcal{N}(y_t | \mathbf{CA} \mu_k^{(i)} , \sigma_\lambda \lambda_t + \mu_\lambda) S_{\alpha/2} (\lambda_t | 1,1,0) \notag \\
-& = \mathcal{N}(y_t - \mathbf{CA} \mu_k^{(i)}|  , \sigma_\lambda \lambda_t + \mu_\lambda) S_{\alpha/2} (\lambda_t | 1,1,0) \notag
+f(y_k, \lambda_k | y_{1:k-1}, \lambda_{0:k-1}^{(i)}) & = \mathcal{N}(y_k | \bvec{CA\mu}_{k-1}^{(i)} , \sigma_\lambda \lambda_k + \mu_\lambda) S_{\alpha/2} (\lambda_k | 1,1,0) \notag \\
+& = \mathcal{N}(\vt |  , \sigma_\lambda \lambda_k + \mu_\lambda) S_{\alpha/2} (\lambda_k | 1,1,0) \notag
 \end{align}
 
 
 %\OptionOne{
 %    
-%    Using a proposal distribution $g(\lambda_t | y_{1:t}, \lambda_{0:t-1}) = S_{\alpha/2}(1,1,0)$, we can bound the probability density from above using: 
+%    Using a proposal distribution $g(\lambda_k | y_{1:k}, \lambda_{0:k-1}) = S_{\alpha/2}(1,1,0)$, we can bound the probability density from above using: 
 %    
 %    \begin{eqnarray}
-%        M & \geq & \frac{f(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})}{g(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})} \notag \\
-%        & = & \frac{1}{\sqrt{2 \pi v_t^2}} \exp (-0.5)
+%        M & \geq & \frac{f(y_k, \lambda_k | y_{1:k-1}, \lambda_{0:k-1})}{g(y_k, \lambda_k | y_{1:k-1}, \lambda_{0:k-1})} \notag \\
+%        & = & \frac{1}{\sqrt{2 \pi v_k^2}} \exp (-0.5)
 %    \end{eqnarray}
 %
 %}
 %
 %\OptionTwo{
 
-Using a proposal distribution $g(\lambda_t | y_{1:t}, \lambda_{0:t-1}) = S_{\alpha/2}(1,1,0)$, we can use the likelihood as a valid rejection function as it is bounded from the above:
+Using a proposal distribution $g(\lambda_k | y_{1:k}, \lambda_{0:k-1}) = S_{\alpha/2}(1,1,0)$, we can use the likelihood as a valid rejection function as it is bounded from the above:
 
 \begin{eqnarray}
-\mathcal{N}(y_t - \bvec{CA\mu}_k^{(i)} | 0, \sigma_\lambda \lambda_t + \mu_\lambda) & \leq & \frac{f(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})}{g(y_t, \lambda_t | y_{1:t-1}, \lambda_{0:t-1})} \notag \\
+\mathcal{N}(\vt | 0, \sigma_\lambda \lambda_k + \mu_\lambda) & \leq & \frac{f(y_k, \lambda_k | y_{1:k-1}, \lambda_{0:k-1})}{g(y_k, \lambda_k | y_{1:k-1}, \lambda_{0:k-1})} \notag \\
 & = & M \notag           
 \end{eqnarray}
 
 \begin{equation}
 M = \begin{cases}
-\frac{1}{\sqrt{2 \pi (y_t - \vec{CA\mu}_k^{(i)})^2}} \exp (-0.5) &  (y_t - \vec{CA\mu}_k^{(i)})^2 \geq \mu_\lambda \\
-\frac{1}{\sqrt{2 \pi d^2}} \exp{ \left( -\frac{(y_t - \vec{CA\mu}_k^{(i)})^2}{2d^2} \right) } & (y_t - \vec{CA\mu}_k^{(i)})^2 \leq \mu_\lambda
+\frac{1}{\sqrt{2 \pi (\vt)^2}} \exp (-0.5) &  (\vt)^2 \geq \mu_\lambda \\
+\frac{1}{\sqrt{2 \pi d^2}} \exp{ \left( -\frac{(\vt)^2}{2d^2} \right) } & (\vt)^2 \leq \mu_\lambda
 \end{cases}
 \end{equation}
 %}
@@ -93,7 +94,7 @@ This gives a suitable rejection sampler as:
 \begin{enumerate}
 	\item Draw $\lambda_k \sim S_{\alpha_2}(1,1,0)$
 	\item Draw $ u \sim U ( 0, M )$
-	\item If $u \geq \mathcal{N}\left( y_t - \bvec{CA\mu}_k^{(i)} | 0, \sigma_\lambda \lambda_k + \mu_\lambda \right)$, reject $\lambda_t$ and go to Step (1)
+	\item If $u \geq \mathcal{N}\left( \vt | 0, \sigma_\lambda \lambda_k + \mu_\lambda \right)$, reject $\lambda_k$ and go to Step (1)
 \end{enumerate}
 
 
@@ -110,7 +111,7 @@ The rejection sampler suffers from poor acceptance rates when $\vt$ is very larg
 
 Due to the additional observation noise term ($d$), we are unable to use the Inverse Gamma approximation to the full posterior as detailed in \cite{godsill1999bayesian}. Instead, we attempt to improve the sampling efficiency by truncating the left tail of the likelihood distribution. 
 
-Due to the intractability of calculating the Cumulative Distribution Function (CDF) of the likelihood analytically, we left-truncate the likelihood where it is smaller than a chosen epsilon. In this project, this small epsilon was chosen to be $\epsilon_{trunc} = 1 \times 10^{-9}$. Further checks are also performed to ensure that this truncation only occurs well into the right tail of the prior. 
+Due to the intractability of calculating the Cumulative Distribution Function (CDF) of the likelihood analytically, we left-truncate the likelihood where it is smaller than a chosen epsilon. In this project, this small epsilon was chosen to be $\epsilon_{trunc} = 1 \times 10^{-50}$. Further checks are also performed to ensure that this truncation only occurs well into the right tail of the prior. 
 
 This allows us to generate samples from a left-truncated form of the $\alpha$-stable prior instead of the full prior. These generated samples are much more likely to be in the high probability regions of the likelihood, thus improving our sampling efficiency greatly.
 

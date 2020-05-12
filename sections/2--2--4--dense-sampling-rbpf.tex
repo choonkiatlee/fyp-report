@@ -11,12 +11,13 @@ This leads to the following algorithm for sampling from the proposal distributio
 
 \begin{itemize}
 	
-	\item Define the hyperparameters $\epsilon_\lambda$ and $m$. In this example, we select $\epsilon_\lambda = 1 \times 10^{-1}$ and $m=3$.
+	\item Define the hyperparameters $\epsilon_\lambda$ (controls the accuracy of the tail approximation) and $m$ (a multiplier which controls the number of extra particles to draw from the tails of the proposal distribution). In this example, we select $\epsilon_\lambda = 1 \times 10^{-1}$ and $m=3$.
 	
 	\item Calculate the number of extra particles ($N_{extra}$) to draw from the right tail using: 
 	
 	\begin{align}
-	threshold &= \frac{f_{pareto}(\lambda_k | \alpha/2, 1) - \SAhalf(\lambda_k | 1,1,0)}{\SAhalf(\lambda_k | 1,1,0)} \\
+	 \epsilon_\lambda  &>  \epsilon_{rel}(\lambda_k = threshold)\notag \\
+	\epsilon_\lambda &> \frac{f_{pareto}(\lambda_k = threshold | \alpha/2, 1) - \SAhalf(\lambda_k  = threshold| 1,1,0)}{\SAhalf(\lambda_k = threshold | 1,1,0)}  \notag\\
 	N_{extra} &= P(\lambda > threshold) \times Nm
 	\end{align} 
 	

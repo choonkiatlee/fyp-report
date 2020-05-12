@@ -1,0 +1,25 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+	
+\textbf{Signal Generation}
+	
+The output of our particle filter inference algorithms is a Monte Carlo estimate of the posterior density and posterior means of the hidden states $\bvec{x}_k$ given all of the observed price observations($y_{1:T}$) up to the current observation time $T$. 
+
+These posterior probability density can in principle be carried forward into optimal decision-making processes about whether to buy or sell the underlying asset. However, this is a relatively complex process with many detailed implementation details. As the main focus of this project is on the inference process rather than the final profitability of the trading algorithm, we adopt a more simplistic approach whereby we generate buy and sell decisions (or ``\textit{trading signals}'' in trading terminology) using solely the posterior mean outputs $\hat{ \bvec{x}_{k}} = \mathbb{E}( \bvec{x}_{k} | y_{1:k})$ of the particle filter. We also focus our trading algorithm on only a single asset at a time rather than a \textit{portfolio} of assets to reduce the implementation complexity.
+
+One method of generating a trading signal from our posterior mean outputs involves making trading decisions using the sign of the estimate of the underlying returns ($x_2$) state as an instantaneous estimate of the predicted price change at the next time step. This is the basic trading approach assumed when calculating the binary prediction error performance metric in the earlier section. 
+
+In this basic form, this algorithm is easy to implement and conceptually very simple. However, it suffers from the drawback that estimates of the \textit{magnitude} of the predicted price change at the next time step are not used, making it hard for the trading algorithm to exploit large predicted changes in price. 
+
+Instead, we employ a slightly more complex trading signal whereby we use the full returns state $x_2$ as the instantaneous estimate of the predicted price change at the next time step. This allows us to scale the trading signal to purchase more assets when the expected returns are high, and purchase less assets when the expected returns are low, which can help to mitigate transaction costs in a practically implemented trading algorithm. 
+
+\textbf{Backtesting}
+
+We next describe how the performance of our complete trading algorithm is tested on past data -- a process known as \textit{backtesting}. We attempt to keep this process as simple as possible whilst capturing key real-life features. 
+
+In order to backtest the algorithm, we construct a notional fund of \$1 million which is placed solely into the single asset being traded. We then run the particle filter, generating particle filter estimates for the hidden state $\bvec{x}_k$. Trading signals are generated using the particle filter output as described above, and buy / sell decisions are undertaken according to these trading signals. We evaluate the profit and loss for the fund on a daily basis at 1800h GMT, which is then aggregated to give annualized figures. 
+
+To evaluate the profit and loss, we use the Sharpe Ratio described in \autoref{sec:experimental_performance}. 	
+	
+\end{document}

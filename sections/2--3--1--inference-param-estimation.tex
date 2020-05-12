@@ -1,0 +1,92 @@
+\documentclass[../main.tex]{subfiles}
+
+
+% Just for our sanity for now
+%\renewcommand{\bvec}[1]{\bm{#1} }
+%
+%\renewcommand{\asd}{$\alpha$-stable distribution }
+%
+%\renewcommand{\vt}{y_k - \bvec{CA\mu}_{k-1}^{(i)}}
+%
+%\renewcommand{\SAhalf}{S_{\alpha/2}}
+
+
+\begin{document}
+	
+
+In this section, we describe how to apply Bayesian parameter estimation for the Rao-Blackwellized Particle Filters developed in \autoref{sec:generic_RBPF} to \autoref{sec:adaptive_sampling_RBPF} using a Metropolis-within-Gibbs sampling scheme. 
+
+We build upon the discrete-time conditionally gaussian state space models given by \autoref{eq:2__2__2__RBPF_model}, with the extension that the matrices governing the model dynamics $\bvec{A}(\bvec{\theta})$, $\bvec{b} (\bvec{\theta}) $, $\bvec{C(\theta)}$ and $\bvec{d}( \bvec{\theta} )$ all depend on some parameter vector $\bvec{\theta}$ of fixed dimension. 
+
+In the context of our project, we define the parameter estimation problem as estimating the parameter vector $\bvec{\theta} = \left\{  \theta, \sigma, \sigma_{obs}  \right\}$, given observations up to time $T$ (i.e. $y_{1:T}$ )
+
+\begin{equation}
+	p(\bvec{\theta}, \lambda_{0:k} | y_{1:k})
+	\label{2__3__1__joint_dist}
+\end{equation}
+
+We construct a Markov Chain to target the joint distribution of the sample parameters $\bvec{\theta}$ and RBPF latent states $\lambda_{1:T}^{(i)}$ given by \autoref{eq:2__3__1__joint_dist} using Gibbs Sampling by iteratively performing the following steps:
+
+\begin{enumerate}
+	\item We draw $\bvec{\theta}$ iteratively using a Metropolis Hastings step to target the required marginal distribution for $\theta_j$ given by \autoref{eq:2__3__1__marginal_param}. 
+	
+	\begin{align}
+		\theta_j &\sim p(\theta_j | \theta_{-j}, \lambda_{0:T}, y_{1:T}    ) \notag\\
+		&\propto p(y_{1:T} | \bvec{\theta}, \lambda_{0:T}^* ) p(\lambda_{0:T}^* | \bvec{\theta}) p(\theta_j | \theta_{-j} )
+		\label{eq:2__3__1__marginal_param}
+	\end{align}
+	
+	Here, we denote $\theta_{-j} = \bvec{\theta} \setminus  \theta_j$ and using $\lambda_{0:T}^*$ to make explicit the notion that a single realisation of $\lambda_{0:T}$ is being used.
+	
+	We can sample from this probability distribution using a Metropolis-Hastings step, with proposal density $q(\theta_j^* | \theta_i')$, where $\theta_j'$ is the current sample of parameter $\theta_j$ and $\theta_j^*$ is the current proposal for $\theta_j$. 
+	
+	For the Metropolis-Hastings step, we accept the current proposal $\theta_j^*$ with acceptance probability $\min(1, \alpha)$, with $\alpha$ given by: 
+	
+	\begin{equation}
+		\alpha = \frac{p(y_{1:T} | \theta_{-j}, \theta_j^*,  \lambda_{0:T}^* ) p(\lambda_{0:T}^* | \theta_{-j}, \theta_j^* ) p(\theta_j^* | \theta_{-j} ) q(\theta_j' | \theta_j^*)  } {   p(y_{1:T} | \theta_{-j}, \theta_j',  \lambda_{0:T}^* ) p(\lambda_{0:T}^* | \theta_{-j}, \theta_j' ) p(\theta_j' | \theta_{-j} ) q(\theta_j^* | \theta_j')  }
+	\end{equation}
+	
+	\item With the accepted parameter vector $\bvec{\theta_{accepted}}$  from step 1, we can then look to sample another realisation of $\lambda_{0:T}^*$ by first drawing a set of weighted samples $\left\{ w_T^{(i)} , \lambda_{0:T}^{(i)} \right\}$ from  the RBPF, denoted by denoted by \autoref{eq:2__3__1__RBPF_sampling}. 
+	
+	\begin{equation}
+		 \left\{ w_T^{(i)} , \lambda_{0:T}^{(i)} \right\}  \sim p(\lambda_{0:T} | y_{1:T}, \bvec{\theta_{accepted}})
+		 \label{eq:2__3__1__RBPF_sampling}
+	\end{equation}
+	
+	Using the weighted samples $\left\{ w_T^{(i)} , \lambda_{0:T}^{(i)} \right\}$ as an importance-sampling estimate of $p(\lambda_{0:T} | y_{1:T}, \bvec{\theta_{accepted}}   )$, we then draw a particular realisation $\lambda_{0:k}^*$ using multinomial sampling by selecting $\lambda_{0:T}^{(i)}$ with probability $w_T^{(i)}$
+	
+\end{enumerate}
+
+For each time step, we thus obtain joint samples $\left\{  \bvec{\theta}, \lambda_{0:T}^* \right\}$, which can be marginalised to obtain samples from the posterior distribution of parameters. 
+
+
+%In the Rao-Blackwellized version of this PMCMC scheme, the PMCMC produces for the final time step $k=T$ in the data, a set of weighted samples $\left\{ \bvec{\theta}, \lambda_{T}^{(i)}, w_{T}^{(i)}  : i = 1,...,N \right\}$ according to: 
+%
+%\begin{itemize}
+%	\item Draw proposed parameters:
+%		
+%		\begin{equation}
+%			\bvec{\theta}^* \sim q(\bvec{\theta}^* | \theta')
+%		\end{equation}
+%	
+%	\item Run the RBPF using the proposed parameters $\bvec{\theta}*$ to obtain a weighted set of particles $\left\{ w_T^{(i)}, \lambda_T^{(i)}, \mu_T^{(i)}, \Sigma_T^{(i)} : i = 1,...,N \right\}$ and a marginal likelihood estimate $\hat{p}(\bvec{y}_{1:T} | \bvec{\theta}^* )$
+%	
+%	We form the approximation to the marginal likelihood as: 
+%	
+%	\begin{equation}
+%		\hat{p}(y_{1:T} | \bvec{\theta}) = \prod_{k=1}^{T} \hat{p}(y_k | y_{1:k-1}, \bvec{\theta})
+%	\end{equation}
+%	
+%	where (using monte-carlo estimates):
+%	
+%	\begin{align}
+%		\hat{p}(y_k | y_{1:k-1}, \bvec{\theta}) &= \sum_{i=1}^{N} w_{k-1}^{(i)} \int  p(y_k | \lambda_{1:k}^{(i)} , y_{1:k-1} ) p(\lambda_{1:k}^{(i)}| \bvec{\theta} ) d\lambda_{0:k} 
+%	\end{align}
+%	
+%	
+%\end{itemize}
+
+
+
+
+\end{document}

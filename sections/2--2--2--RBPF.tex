@@ -6,16 +6,16 @@
 
 In foreign exchange markets such as the EUR/USD, market moves are widely regarded to be symmetric in nature \cite{tankov2003financial}. This motivates the selection of the parameter $\beta = 0$. Instead of considering the general $\alpha$-stable process, we can instead restrict ourselves to a more analytically tractable sub-class, the a Symmetric $\alpha$-stable (S$\alpha$S) process instead.
 
-For $\beta = 0$, we have a convenient Scale Mixture of Normals (SMiN) representation based off the product property of $\alpha$-stable distributions: If X and Y are independent random variables with $\lambda_t \sim S_{\alpha/2}(1, 1, 0)$ and $\eta_t \sim S_2(1,0,0) = \mathcal{N}(0,1)$, then $\lambda_t \eta_t \sim S_\alpha(1, 0, 0)$.
+For $\beta = 0$, we have a convenient Scale Mixture of Normals (SMiN) representation based on the product property of $\alpha$-stable distributions: If X and Y are independent random variables with $\lambda_k \sim S_{\alpha/2}(1, 1, 0)$ and $\eta_k \sim S_2(1,0,0) = \mathcal{N}(0,1)$, then $\lambda_k \eta_k \sim S_\alpha(1, 0, 0)$.
 
 We can then convert the discretised state space model specified in \autoref{eq:2__2__1__drift_corrected_simple_PF} into SMiN form as specified in \autoref{eq:2__2__2__RBPF_model} below.
 
 \begin{equation}
     \underbrace{
         \begin{bmatrix}
-        x_{1,t+\delta t} \\ x_{2,t + \delta_t}
+        x_{1,k} \\ x_{2,k}
         \end{bmatrix}
-    }_{\mathbf{x_{t + \delta t}}}
+    }_{\mathbf{x_{k}}}
     =
     \underbrace{
         \begin{bmatrix}
@@ -24,22 +24,22 @@ We can then convert the discretised state space model specified in \autoref{eq:2
     }_{\mathbf{A}}
     \underbrace{
         \begin{bmatrix}
-        x_{1,t} \\ x_{2,t}
+        x_{1,k-1} \\ x_{2,k-1}
         \end{bmatrix}
-    }_{\mathbf{x_t}}
+    }_{\mathbf{x_{k-1}}}
     + 
     \underbrace{
         \begin{bmatrix}
         0 \\ \sigma_{\delta t}
         \end{bmatrix}
-    }_{\mathbf{b}} \sqrt{\lambda_{t + \delta t}} \eta_{t + \delta t} ;
-    \qquad \eta_{t + \delta t} \sim \mathcal{N}(0,1) \text{,   } \lambda_{t + \delta t} \sim S_{\alpha/2}(1,1,0)
+    }_{\mathbf{b}} \sqrt{\lambda_{k}} \eta_{k} ;
+    \qquad \eta_{k} \sim \mathcal{N}(0,1) \text{,   } \lambda_{k} \sim S_{\alpha/2}(1,1,0)
     \label{eq:2__2__2__RBPF_model}
 \end{equation}
 
-This means that conditional upon us observing $\lambda_{t + \delta t}$, $\bvec{x}_{t + \delta t}$ is gaussian, making inference much more tractable. We exploit this fact by designing a Rao-Blackwellised Particle Filter to sample $\lambda_{t + \delta t}$ by using a simple particle filter, and propogating the states using a Kalman Filter conditioned upon the sampled $\lambda_{t + \delta t}$ of the particle. 
+This means that conditional upon us observing $\lambda_{k}$, $\bvec{x}_{k}$ is gaussian, making inference much more tractable. We exploit this fact by designing a Rao-Blackwellised Particle Filter to sample $\lambda_{k}$ by using a simple particle filter, and propogating the states using a Kalman Filter conditioned upon the sampled $\lambda_{k}$ of the particle. 
 
-We take a short detour to properly formulate the inference problem using the SMiN representation here. In the inference problem, we are seeking to infer the state variables $\mathbf{x}_{t + \delta t}$ given the observations $y_{t + \delta t}$. Changing indexes using $k = t + \delta t, k-1 = t$, to reflect the discretised nature of the problem, we assume model dynamics as follows:
+We take a short detour to formulate the inference problem using the SMiN representation here. In the inference problem, we are seeking to infer the state variables $\mathbf{x}_{k}$ given the observations $y_{k}$. we assume model dynamics as follows:
 
 \begin{eqnarray}
     \mathbf{x}_k & = & \mathbf{A} \mathbf{x}_{k-1} + \mathbf{b} \sqrt{\lambda_k} \eta_k \notag \\
@@ -153,7 +153,7 @@ In order to compare the entropy of the particle weights across different number 
 H_n(w) = \frac{1}{\log_b(N)}\sum_{i=1}^N w_i \log_b(w_i)  \qquad \text{where: } \sum_{i=1}^N w_i = 1   \label{eq:2__2__2__normalised_entropy}
 \end{equation}
 
-We demonstrate the problem of sample impoverishment by simulating a single time step of the particle filter, for varying values of $\vt$. Fixing $\mu_k^{(i)}$, $\Sigma_k^{(i)}$ whilst varying $y_k$ and $N$, we simulate one time step of the RBPF update step described above and present the normalised entropy of the particle filter weights obtained in Figure \ref{fig:2__2__2__sample_impoverishment}. We see that the normalised entropy of the particle filter weights drops rapidly for large $\vt$, and that the as $N$ increases, the normalised entropy of the particle filter weights is more resistant to sample impoverishment at large values of $\vt$ as expected. 
+We demonstrate the problem of sample impoverishment by simulating a single time step of the particle filter, for varying values of $\vt$. Fixing $\mu_{k-1}^{(i)}$, $\Sigma_{k-1}^{(i)}$ whilst varying $y_k$ and $N$, we simulate one time step of the RBPF update step described above and present the normalised entropy of the particle filter weights obtained in Figure \ref{fig:2__2__2__sample_impoverishment}. We see that the normalised entropy of the particle filter weights drops rapidly for large $\vt$, and that the as $N$ increases, the normalised entropy of the particle filter weights is more resistant to sample impoverishment at large values of $\vt$ as expected. 
 
 \begin{figure}[h!]
 	\centering
@@ -161,12 +161,4 @@ We demonstrate the problem of sample impoverishment by simulating a single time 
 	\caption{Change in normalised entropy of PF weights as $\vt$ and $N$ are varied}
 	\label{fig:2__2__2__sample_impoverishment}
 \end{figure}
-
-\textbf{Dense Sampling}
-
-
-
-\textbf{Adaptive Sampling}
-
-
 \end{document}

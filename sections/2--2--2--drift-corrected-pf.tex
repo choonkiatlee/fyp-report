@@ -8,9 +8,9 @@ To combat the problem of drift, we incorporate a discrete integration approximat
 \begin{equation}
 \underbrace{
 	\begin{bmatrix}
-	x_{1,t+\delta t} \\ x_{2,t + \delta_t}
+	x_{1,k} \\ x_{2,k}
 	\end{bmatrix}
-}_{\mathbf{S_{t + \delta t}}}
+}_{\mathbf{x_{k}}}
 =
 \underbrace{
 	\begin{bmatrix}
@@ -19,15 +19,15 @@ To combat the problem of drift, we incorporate a discrete integration approximat
 }_{\mathbf{A}}
 \underbrace{
 	\begin{bmatrix}
-	x_{1,t} \\ x_{2,t}
+	x_{1,k-1} \\ x_{2,k-1}
 	\end{bmatrix}
-}_{\mathbf{S_t}}
+}_{\mathbf{S_{k-1}}}
 + 
 \underbrace{
 	\begin{bmatrix}
-	0 \\ 1
+	0 \\ \sigma_{\delta t}
 	\end{bmatrix}
-}_{\mathbf{b}} L_t, \qquad  L_t \sim S_\alpha (\sigma_{\delta t}, \beta, 0)
+}_{\mathbf{b}} L_k, \qquad  L_k \sim S_\alpha (1 , \beta, 0)
 \label{eq:2__2__1__drift_corrected_simple_PF}
 \end{equation}
 

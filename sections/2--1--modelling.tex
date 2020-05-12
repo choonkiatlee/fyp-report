@@ -4,12 +4,10 @@
 
 \subsubsection{Basic State Space Model}
 
-We build upon the model proposed by Christensen et al. \cite{christensen2012forecasting} (\autoref{eq:2__1__christensen_state_space_model}). In the original Christensen model, the state of the traded commodity is modelled by 2 components: ``value'' $x_1$ and ``trend'' $x_2$. These components correspond to the the price and return of the traded commodity respectively. 
+We build upon the model proposed by Christensen et al. \cite{christensen2012forecasting} and summarised in \autoref{eq:2__1__christensen_state_space_model}. In the original Christensen model, the state of the traded commodity is modelled by 2 components: ``value'' $x_1$ and ``trend'' $x_2$. These components correspond to the the price and return of the traded commodity respectively. 
 
-\tofix{Insert Picture Here}
-
-Trend changes can cause difficulty for momentum strategies. This model attempts to address this issue by allowing for a finite number of discrete jumps in the trend process. This allows for modelling of sharp changes of sentiment in the market, and allow our filtered predictions to reflect these changes of sentiment more quickly than models that simply smooth the price series. 
-
+In this model, the trend is specified as a mean-reverting random process subject to two different types of random innovations: Gaussian noise of constant volatility and random jumps. The value component($x_1$) is obtained by integrating the trend process ($x_2$) with respect to time. Observed prices, $y$ are modeled as observations of the value process $x_1$ corrupted by random Gaussian noise. 
+ 
 \begin{equation}
     \begin{bmatrix}
     dx_{1,t} \\ dx_{2,t}
@@ -37,15 +35,17 @@ Trend changes can cause difficulty for momentum strategies. This model attempts 
     \label{eq:2__1__christensen_state_space_model}
 \end{equation}
 
+However, sharp trend changes can cause difficulty for momentum strategies. This model attempts to address this issue by allowing for a finite number of discrete jumps in the trend process. This allows for modelling of sharp changes of sentiment in the market, and allow the filtered predictions to reflect these changes of sentiment more quickly than models that simply smooth the price series. 
+
 \subsubsection{Proposed State-Space Model}
 
 Statistical testing has found that infinite-activity jumps (rather than finite-activity jumps) are present in high frequency stock returns \cite{ait2011testing}. This might be due to significant price movements triggering stop-loss orders that prompt further trading, leading to a self-exciting series of high frequency small jumps \cite{osler2005stop}.
 
 Thus, we propose modelling a tradable commodity's price using Lévy-type processes with infinite jump activity as given by \autoref{eq:2__1__our_state_space_model} below.
-\begin{equation}
+\begin{align}
     \begin{bmatrix}
     dx_{1,t} \\ dx_{2,t}
-    \end{bmatrix} = 
+    \end{bmatrix} &= 
     \underbrace{
         \begin{bmatrix}
         0 & 1 \\ 0 & \theta
@@ -59,14 +59,14 @@ Thus, we propose modelling a tradable commodity's price using Lévy-type process
         \begin{bmatrix}
         0 \\ 1
         \end{bmatrix} dL_t
-    }_{\text{Infinite-activity Lévy process}}
+    }_{\text{Infinite-activity Lévy process}} \\ \notag \\
+	y_t &= x_{1,t} + \sigma_{obs} \eta_t
     \label{eq:2__1__our_state_space_model}
-\end{equation}
+\end{align}
 
-We then observe the price process corrupted in gaussian noise:
-\begin{equation}
-    y_t = x_{1,t} + \sigma_{obs} \eta_t \text{, where } \eta_t \sim \mathcal{N}(0,1)
-\end{equation}
+where: 
+$$ \eta_t \sim \mathcal{N}(0,1) $$
+
 
 \subsubsection{Choice of Lévy process}
 
@@ -109,17 +109,16 @@ For the scalar case, this can be solved using results based on \cite{samoradnits
 
 Using the solution to the one-dimensional version of the proposed model in \autoref{eq:2__1__state_transition_density}, we can formulate our original continuous-time state space model as a discrete-time state space model where the parameters of the discrete-time state matrices $\bvec{A}(\delta t)$ and $\bvec{b}(\delta t)$ vary according to the continuous time solution and the gap to the previous time step, $\delta t$. 
 
-For brevity, we will assume in all subsequent equations that $\bvec{A}$ and $\bvec{b}$ are implicitly dependent on $\delta t$, and will drop this explicit dependence. 
+To reflect the discretised nature of time used in the inference problem, we change the time indexes using $k = t + \delta t, k-1 = t$. For brevity, we will also assume in all subsequent equations that $\bvec{A}$ and $\bvec{b}$ are implicitly dependent on $\delta t$, and will drop this explicit dependence. 
 
 This approach allows us to use established techniques used for discrete time inference. 
 
 \begin{align}
-    \mathbf{x}_t & = \mathbf{A}(\delta t) . \mathbf{x_{t-1}} + \mathbf{b}( \delta t) . L_t \notag\\
-    y_t & = \mathbf{C} . \mathbf{x}_t + \mathbf{d} . \mathbf{\eta}_t \\
-    \text{where} \qquad \delta_t & = T_t - T_{t-1} \notag \\
-    l_t & \sim S_{\alpha/2}(1,1,0) \text{  and  } \eta_t \sim \mathcal{N}(0,1) \notag
+    \mathbf{x}_k & = \mathbf{A}(\delta t) . \mathbf{x_{k-1}} + \mathbf{b}( \delta t) . L_k \notag\\
+    y_k & = \mathbf{C} . \mathbf{x}_k + \mathbf{d} . \mathbf{\eta}_k \\
+    \text{where} \qquad \delta_t & = t_k - t_{k-1} \notag \\
+    L_k & \sim S_{\alpha/2}(1,1,0) \text{  and  } \eta_k \sim \mathcal{N}(0,1) \notag
 \end{align}
 
 
-\printbibliography
 \end{document}
